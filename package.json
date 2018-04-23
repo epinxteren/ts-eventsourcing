@@ -1,0 +1,27 @@
+{
+  "name": "@batteryincluded/ts-eventsourcing",
+  "private": false,
+  "version": "1.0.0",
+  "description": "Typed event sourcing framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/epinxteren/ts-eventsourcing.git"
+  },
+  "keywords": [
+    "typescript",
+    "ts",
+    "eventsourcing",
+    "cqrs",
+    "redux"
+  ],
+  "author": "Eric Pinxteren",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/epinxteren/ts-eventsourcing/issues"
+  },
+  "homepage": "https://gitlab.com/epinxteren/ts-eventsourcing#README"
+}
