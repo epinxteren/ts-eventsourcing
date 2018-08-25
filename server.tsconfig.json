@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig",
+  "include": [
+    "src/server/*",
+    "src/shared/*"
+  ],
+  "exclude": [
+    "src/client/*"
+  ]
+}

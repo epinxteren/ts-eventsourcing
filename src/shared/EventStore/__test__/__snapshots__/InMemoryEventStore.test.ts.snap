@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`InMemoryEventStore Can have multiple different events streams: InMemoryEventStore 1`] = `
+InMemoryEventStore {
+  "events": Object {
+    "aggregate1 ID": SimpleDomainEventStream {
+      "_isScalar": false,
+      "_subscribe": [Function],
+      "events$": ArrayObservable {
+        "_isScalar": false,
+        "array": Array [
+          DomainMessage {
+            "aggregateId": Identity {
+              "id": "aggregate1 ID",
+            },
+            "metadata": Object {},
+            "payload": DomainEvent {},
+            "playhead": 0,
+            "recordedOn": 1970-01-18T18:26:23.762Z,
+          },
+          DomainMessage {
+            "aggregateId": Identity {
+              "id": "aggregate1 ID",
+            },
+            "metadata": Object {},
+            "payload": DomainEvent {},
+            "playhead": 1,
+            "recordedOn": 1970-01-18T18:26:23.762Z,
+          },
+        ],
+        "scheduler": null,
+      },
+    },
+    "aggregate2 ID": SimpleDomainEventStream {
+      "_isScalar": false,
+      "_subscribe": [Function],
+      "events$": ArrayObservable {
+        "_isScalar": false,
+        "array": Array [
+          DomainMessage {
+            "aggregateId": Identity {
+              "id": "aggregate2 ID",
+            },
+            "metadata": Object {},
+            "payload": DomainEvent {},
+            "playhead": 0,
+            "recordedOn": 1970-01-18T18:26:23.762Z,
+          },
+          DomainMessage {
+            "aggregateId": Identity {
+              "id": "aggregate2 ID",
+            },
+            "metadata": Object {},
+            "payload": DomainEvent {},
+            "playhead": 1,
+            "recordedOn": 1970-01-18T18:26:23.762Z,
+          },
+        ],
+        "scheduler": null,
+      },
+    },
+  },
+}
+`;

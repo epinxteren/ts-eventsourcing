@@ -1,0 +1,36 @@
+{
+  "extends": [
+    "tslint:recommended",
+    "tslint-immutable",
+    "tslint-config-airbnb",
+  ],
+  "jsRules": {
+    "object-literal-sort-keys": false
+  },
+  "rules": {
+    "function-name": false,
+    "prefer-array-literal": false,
+    "variable-name": [
+      true,
+      "allow-leading-underscore",
+      "ban-keywords"
+    ],
+    "semicolon": [true, "always", "ignore-bound-class-methods"],
+    "import-name": false,
+    "ordered-imports": false,
+    "no-empty-interface": false,
+    "ter-arrow-parens":  false,
+    "object-literal-sort-keys": false,
+    "object-shorthand-properties-first": false,
+    "interface-name": ["never-prefix"],
+    "max-line-length": [150],
+    "no-duplicate-imports": false,
+    "jsx-no-multiline-js": false,
+    "cyclomatic-complexity": [
+      true,
+      12
+    ],
+    "jsx-boolean-value": false
+  },
+  "rulesDirectory": []
+}

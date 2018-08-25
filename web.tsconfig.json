@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig",
+  "include": [
+    "src/client/*",
+    "src/shared/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/server/**/*",
+    "**/*.spec.ts"
+  ]
+}
