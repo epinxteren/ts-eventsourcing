@@ -97,7 +97,7 @@ it('Can test a projector manually', async () => {
       const repository = testBench.getReadModelRepository(UserLogInStatistics);
       const model = await repository.get(id);
       expect(model.getCount()).toEqual(3);
-    });
+    })
 });
 
 it('Can test a projector manually for a single model', async () => {
@@ -141,5 +141,5 @@ it('Can test a projector with spies', async () => {
     ])
     .thenAssert(async () => {
       expect(spy).toHaveBeenCalledTimes(3);
-    });
+    })
 });

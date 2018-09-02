@@ -14,10 +14,10 @@ import { ReadModel, ReadModelConstructor } from '../ReadModel';
  */
 export class EventSourcingFluidTestBench {
 
-  private queue: Array<() => Promise<any>> = [];
+  private promise: Promise<void>;
 
   constructor(private readonly testBench: EventSourcingTestBench, promise: () => Promise<void>) {
-    this.queue.push(promise);
+    this.promise = promise();
   }
 
   public givenCommandHandler(createHandler: (testBench: EventSourcingTestBench) => CommandHandler): this {
@@ -59,51 +59,42 @@ export class EventSourcingFluidTestBench {
     return this.proxy('whenEventsHappened', id, events);
   }
 
-  public thenMatchEvents(events: (DomainEvent | DomainMessage)[]): Promise<EventSourcingTestBench> {
-    this.proxy('thenMatchEvents', events);
-    return this.waitForPending();
+  public thenMatchEvents(events: (DomainEvent | DomainMessage)[]): this {
+    return this.proxy('thenMatchEvents', events);
   }
 
-  public thenModelsShouldMatch<T extends ReadModel>(modelsOrFactory: ValueOrFactory<T[]>): Promise<EventSourcingTestBench> {
-    this.proxy('thenModelsShouldMatch', modelsOrFactory);
-    return this.waitForPending();
+  public thenModelsShouldMatch<T extends ReadModel>(modelsOrFactory: ValueOrFactory<T[]>): this {
+    return this.proxy('thenModelsShouldMatch', modelsOrFactory);
   }
 
   public thenAssertModel<T extends ReadModel>(
     modelClass: ReadModelConstructor<T>,
     id: Identity,
     matcher: (model: T, testBench: EventSourcingTestBench) => Promise<void> | void
-  ): Promise<EventSourcingTestBench> {
-    this.proxy('thenAssertModel', modelClass, id, matcher);
-    return this.waitForPending();
+  ): this {
+    return this.proxy('thenAssertModel', modelClass, id, matcher);
   }
 
-  public thenAssert(asserting: (testBench: EventSourcingTestBench) => Promise<void> | void): Promise<EventSourcingTestBench> {
-    this.proxy('thenAssert', asserting);
-    return this.waitForPending();
+  public thenAssert(asserting: (testBench: EventSourcingTestBench) => Promise<void> | void): this {
+    return this.proxy('thenAssert', asserting);
   }
 
-  public async waitForPending(): Promise<EventSourcingTestBench> {
-    const queue = this.queue;
-    this.queue = [];
-    for (const pending of queue) {
-      await pending();
-    }
-    return this.testBench;
+  public then<TResult1 = EventSourcingTestBench, TResult2 = never>(onfulfilled?: ((value: EventSourcingTestBench) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
+    return this.promise.then(() => this.testBench).then(onfulfilled, onrejected);
   }
 
-  public proxy<M extends keyof EventSourcingTestBench>(method: M, ...args: any[]) {
+  public catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<EventSourcingTestBench | TResult> {
+    return this.promise.then(() => this.testBench).catch(onrejected);
+  }
+
+  protected proxy<M extends keyof EventSourcingTestBench>(method: M, ...args: any[]) {
     return this.addPending(() => {
-      const result = (this.testBench as any)[method](...args);
-      if (result instanceof EventSourcingFluidTestBench) {
-        return result.waitForPending();
-      }
-      return result;
+      return (this.testBench as any)[method](...args);
     });
   }
 
-  private addPending(pending: () => Promise<any>): this {
-    this.queue.push(pending);
+  protected addPending(pending: () => Promise<any>): this {
+    this.promise = this.promise.then(pending);
     return this;
   }
 }
