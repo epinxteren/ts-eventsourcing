@@ -1,4 +1,4 @@
-import { EventStore } from '../../EventStore/EventStore';
+import { EventStore } from '../../EventStore';
 import { DomainEventBus } from '../../EventHandling';
 import { AggregateDomainEventStreamDecorator, DomainEventStream, DomainEventStreamDecorator } from '../../Domain';
 import { EventSourcedAggregateRoot } from '../EventSourcedAggregateRoot';
@@ -23,7 +23,7 @@ export class EventSourcingRepository<AggregateClass extends EventSourcedAggregat
     const domainEventStream = aggregate.getUncommittedEvents();
     const eventStream = this.decorateForWrite(aggregate, domainEventStream);
     await this.eventStore.append(aggregate.getAggregateRootId(), eventStream);
-    await this.eventBus.publish(domainEventStream);
+    await this.eventBus.publish(eventStream);
   }
 
   protected decorateForWrite(aggregate: AggregateClass, stream: DomainEventStream): DomainEventStream {

@@ -8,7 +8,7 @@ const EVENT_HANDLER_FUNCTIONS = 'event:handler:functions';
 
 export interface DomainEventHandlerMetadata {
   functionName: string;
-  event: DomainEventConstructor;
+  event: DomainEventConstructor<any>;
   eventArgumentIndex: number;
 }
 

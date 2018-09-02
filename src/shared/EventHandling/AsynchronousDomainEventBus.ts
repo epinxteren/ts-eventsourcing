@@ -11,6 +11,8 @@ import { Subject, Observable, Subscription } from 'rxjs';
 
 /**
  * Always passes all events in sequence to the event corresponding handlers.
+ *
+ * TODO: extract handler binding from this class.
  */
 export class AsynchronousDomainEventBus implements DomainEventBus {
   private queue: DomainEventStream[] = [];

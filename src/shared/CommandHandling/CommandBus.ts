@@ -5,7 +5,7 @@ export interface CommandBus {
   /**
    * Dispatches the command command to the proper CommandHandler.
    */
-  dispatch(command: Command): void;
+  dispatch(command: Command): Promise<any>;
   /**
    * Subscribes the command handler to this CommandBus.
    */

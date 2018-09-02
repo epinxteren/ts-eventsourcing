@@ -8,7 +8,7 @@ const EVENT_HANDLER_FUNCTIONS = 'event_sourced_entity:event:handler:functions';
 
 export interface EventHandlerMetadata  {
   functionName: string;
-  event: DomainEventConstructor;
+  event: DomainEventConstructor<any>;
 }
 
 export function allAggregateEventHandlersMetadata(target: EventSourcedEntity): EventHandlerMetadata[] {

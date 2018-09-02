@@ -78,9 +78,7 @@ it('Should always be a handler for a command', () => {
   }
 
   let command = new TestCommand();
-  expect(() => {
-    simpleBus.dispatch(command);
-  }).toThrowError(CommandHandlerNotRegisteredError);
+  return expect(simpleBus.dispatch(command)).rejects.toBeInstanceOf(CommandHandlerNotRegisteredError);
 });
 
 it('Cannot have 2 handlers for same command', () => {

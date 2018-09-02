@@ -18,13 +18,13 @@ export class SimpleCommandBus implements CommandBus {
   /**
    * Dispatches the command command to the proper CommandHandler.
    */
-  public dispatch(command: Command): void {
+  public async dispatch(command: Command): Promise<any> {
     const commandName = ClassUtil.nameOffInstance(command);
     const handler = this.handlers[commandName];
     if (!handler) {
-      throw CommandHandlerNotRegisteredError.missingHandler(command);
+      return Promise.reject(CommandHandlerNotRegisteredError.missingHandler(command));
     }
-    handler(command);
+    return await handler(command);
   }
 
   /**

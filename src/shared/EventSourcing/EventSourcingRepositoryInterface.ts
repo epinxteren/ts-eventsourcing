@@ -1,10 +1,10 @@
 import { EventSourcedAggregateRoot } from './EventSourcedAggregateRoot';
 import { Identity } from '../Identity';
 
-export interface EventSourcingRepositoryInterface<AggregateClass extends EventSourcedAggregateRoot> {
+export interface EventSourcingRepositoryInterface<T extends EventSourcedAggregateRoot = EventSourcedAggregateRoot> {
 
-  load(id: Identity): Promise<AggregateClass>;
+  load(id: Identity): Promise<T>;
 
-  save(aggregate: AggregateClass): Promise<void>;
+  save(aggregate: T): Promise<void>;
 
 }

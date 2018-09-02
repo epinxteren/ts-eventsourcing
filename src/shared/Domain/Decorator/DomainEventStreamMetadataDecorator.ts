@@ -1,6 +1,6 @@
 import { DomainEventStreamDecorator } from '../DomainEventStreamDecorator';
 import { DomainMessage } from '../DomainMessage';
-import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
+import { EventSourcedAggregateRoot } from '../../EventSourcing';
 import { DomainEventStream } from '../DomainEventStream';
 import { SimpleDomainEventStream } from '../SimpleDomainEventStream';
 

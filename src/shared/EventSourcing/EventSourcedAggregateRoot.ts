@@ -7,6 +7,10 @@ import {
 } from '../Domain';
 import { Identity } from '../Identity';
 
+export interface EventSourcedAggregateRootConstructor<T extends EventSourcedAggregateRoot = EventSourcedAggregateRoot> {
+  new (id: Identity): T;
+}
+
 export class EventSourcedAggregateRoot extends EventSourcedEntity {
 
   private playhead = -1;
