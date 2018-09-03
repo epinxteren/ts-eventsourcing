@@ -10,4 +10,4 @@ This project goal is to make your life easy with the ease to use **jest** testbe
 
 ![jest](assets/jest.png)
 
-See examples in **/src/__test/*Example.ts]**
+See examples in **/src/__test/\*Example.ts**
