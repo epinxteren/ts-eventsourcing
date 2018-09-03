@@ -1,0 +1,8 @@
+#.cpd.yaml
+languages:
+  - javascript
+  - typescript
+files:
+  - "src/**/*"
+exclude: ['**/__test__/**']
+reporter: json

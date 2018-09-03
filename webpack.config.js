@@ -12,12 +12,9 @@ const config =
     .addPlugin(new CaseSensitivePathsPlugin())
 
     // The project directory where all compiled assets will be stored.
-    .setOutputPath("build/server/")
+    .setOutputPath("build/")
 
-    // The public path used by the web server to access the previous directory.
-    .setPublicPath("/")
-
-    .addEntry("main", "./src/server/main.ts")
+    .addEntry("main", "./src/index.ts")
     .cleanupOutputBeforeBuild()
     .addLoader({
         test: /\.tsx?|\.js$/,

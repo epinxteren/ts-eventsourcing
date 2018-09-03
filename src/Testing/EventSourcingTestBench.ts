@@ -26,13 +26,16 @@ export class EventSourcingTestBench {
   public readonly commandBus: CommandBus = new SimpleCommandBus();
   public readonly aggregates = new AggregateTestContextCollection(this);
   public readonly models = new ReadModelTestContextCollection();
-  public readonly eventBus: DomainEventBus = this.recordBus;
-  private readonly asyncBus = new AsynchronousDomainEventBus();
-  private readonly recordBus = new RecordDomainEventBusDecorator(this.asyncBus);
+  public readonly eventBus: DomainEventBus;
+  private readonly asyncBus: AsynchronousDomainEventBus;
+  private readonly recordBus: RecordDomainEventBusDecorator;
   private currentTime: Date;
 
   constructor(currentTime: Date | string = EventSourcingTestBench.defaultCurrentTime) {
     this.currentTime = this.parseDateTime(currentTime);
+    this.asyncBus = new AsynchronousDomainEventBus();
+    this.recordBus = new RecordDomainEventBusDecorator(this.asyncBus);
+    this.eventBus = this.recordBus;
   }
 
   public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler>): this {
