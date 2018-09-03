@@ -3,12 +3,9 @@ module.exports = {
     testURL: 'http://localhost',
     coverageDirectory: "coverage",
     collectCoverageFrom: [
-        "src/**/*.{ts,tsx,js,jsx}",
-        "!**/*test.{ts,tsx,js,jsx}",
-        "!build/**",
-        "!node_modules/**",
-        "!**/node_modules/**",
-        "!.yarn-cache/**"
+        "src/**/*.{ts}",
+        "!**/*test.{ts}",
+        "!**/*.d.{ts}"
     ],
     coverageThreshold: {
         "global": {
@@ -28,7 +25,7 @@ module.exports = {
     transform: {
         "\\.(ts|tsx)$": "ts-jest"
     },
-    testRegex: ".*\\.test\\.(ts|tsx|js|jsx)$",
+    testRegex: ".*\\.test\\.ts$",
     globals: {
         "ts-jest": {
             tsConfigFile: "tsconfig.json",

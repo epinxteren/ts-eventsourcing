@@ -4,11 +4,10 @@
     "removeComments": false,
     "noLib": false,
     "target": "es2017",
-    "outDir": "./build",
 
     /* Basic Options */
     "skipLibCheck": true,                     /* Skip type checking of declaration files.  */
-    "sourceMap": true,                        /*  Generates corresponding '.map' file. */
+    "sourceMap": true,                        /* Generates corresponding '.map' file. */
     "declaration": true,                      /* Generates corresponding '.d.ts' file. */
 
     /* Strict Type-Checking Options */
