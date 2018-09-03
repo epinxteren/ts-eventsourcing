@@ -88,7 +88,7 @@ describe('InMemoryRepository', () => {
   it('Throws error when model is not found', async () => {
     const repository = new InMemoryRepository<TestReadModel>();
     const id = new Identity('123');
-    await expect(repository.get(id)).rejects.toEqual(`Model with id 123 not found`);
+    await expect(repository.get(id)).rejects.toEqual('Model with id 123 not found');
   });
 
   it('Can find model from store', async () => {

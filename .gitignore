@@ -1,3 +1,7 @@
 coverage
 .idea
 node_modules
+yarn-error.log
+src/**/*.d.ts
+src/**/*.map
+src/**/*.js

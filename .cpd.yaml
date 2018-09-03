@@ -4,5 +4,9 @@ languages:
   - typescript
 files:
   - "src/**/*"
-exclude: ['**/__test__/**']
+exclude:
+  - '**/__test__/**'
+  - '**/*d.ts'
+  - '**/*.map'
+  - '**/*.js'
 reporter: json
