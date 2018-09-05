@@ -4,7 +4,10 @@ import { EventSourcingTestBench } from '../EventSourcingTestBench';
 import { Command, CommandHandler } from '../../CommandHandling';
 import { EventListener } from '../../EventHandling';
 import { Identity } from '../../Identity';
-import { EventSourcedAggregateRoot } from '../../EventSourcing';
+import {
+  EventSourcedAggregateRoot,
+  EventSourcingRepository,
+} from '../../EventSourcing';
 import { DomainEvent, DomainEventStream, DomainMessage, SimpleDomainEventStream } from '../../Domain';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
@@ -295,6 +298,53 @@ describe('Should validate date', () => {
     expect(() => {
       testBench.whenTimeChanges('not valid');
     }).toThrow();
+  });
+
+});
+
+describe('givenCommandHandler should be able to give own repository', () => {
+
+  class TestAggregate extends EventSourcedAggregateRoot {
+
+  }
+
+  class TestRepository extends EventSourcingRepository<TestAggregate> {
+  }
+
+  it('by value', () => {
+    const testBench = new EventSourcingTestBench();
+    const context = testBench.getAggregateTestContext(TestAggregate);
+    const repository = new TestRepository(
+      context.getEventStore(),
+      testBench.eventBus,
+      context.getAggregateFactory(),
+      context.getEventStreamDecorator(),
+    );
+    testBench.givenAggregateRepository(TestAggregate, repository);
+    expect(testBench.getAggregateRepository(TestAggregate)).toBe(repository);
+  });
+
+  it('by callback factory', () => {
+    const testBench = EventSourcingTestBench
+      .create()
+      .givenAggregateRepository(TestAggregate, (tb) => {
+        const context = tb.getAggregateTestContext(TestAggregate);
+        return new TestRepository(
+          context.getEventStore(),
+          tb.eventBus,
+          context.getAggregateFactory(),
+          context.getEventStreamDecorator(),
+        );
+      });
+    expect(testBench.getAggregateRepository(TestAggregate)).toBeInstanceOf(TestRepository);
+  });
+
+  it('by default constructor interface', () => {
+    const testBench = EventSourcingTestBench
+      .create()
+      .givenAggregateRepository(TestAggregate, TestRepository);
+    expect(testBench.getAggregateRepository(TestAggregate)).toBeInstanceOf(TestRepository);
+    expect(testBench.getAggregateRepository(TestAggregate)).toMatchSnapshot();
   });
 
 });

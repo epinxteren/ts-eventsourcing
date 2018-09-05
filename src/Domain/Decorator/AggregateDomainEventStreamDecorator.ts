@@ -1,4 +1,4 @@
-import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
+import { EventSourcedAggregateRoot } from '../../EventSourcing';
 import { DomainEventStreamDecorator, DomainEventStream } from '..';
 
 export class AggregateDomainEventStreamDecorator implements DomainEventStreamDecorator {
@@ -14,4 +14,10 @@ export class AggregateDomainEventStreamDecorator implements DomainEventStreamDec
     }
     return chain;
   }
+
+  public add(docrator: DomainEventStreamDecorator): this {
+    this.decorators.push(docrator);
+    return this;
+  }
+
 }

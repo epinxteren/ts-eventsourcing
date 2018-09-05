@@ -1,5 +1,9 @@
 import { SimpleCommandBus, CommandBus, CommandHandler, Command } from '../CommandHandling';
-import { EventSourcedAggregateRoot, EventSourcedAggregateRootConstructor } from '../EventSourcing';
+import {
+  EventSourcedAggregateRoot,
+  EventSourcedAggregateRootConstructor,
+  EventSourcingRepositoryInterface, isEventSourcingRepositoryConstructor,
+} from '../EventSourcing';
 import { AsynchronousDomainEventBus, DomainEventBus, EventListener } from '../EventHandling';
 import { AggregateTestContextCollection } from './Context/AggregateTestContextCollection';
 import { EventSourcingFluidTestBench } from './EventSourcingFluidTestBench';
@@ -12,6 +16,7 @@ import { ReadModelTestContextCollection } from './Context/ReadModelTestContextCo
 import { ReadModel, ReadModelConstructor, Repository } from '../ReadModel';
 import { ReadModelTestContext } from './Context/ReadModelTestContext';
 import * as moment from 'moment';
+import { EventSourcingRepositoryConstructor } from '../EventSourcing/Repository/EventSourcingRepository';
 
 export type ValueOrFactory<T> = T | ((testBench: EventSourcingTestBench) => T);
 
@@ -66,6 +71,26 @@ export class EventSourcingTestBench {
 
   public givenCurrentTime(currentTime: Date | string) {
     this.currentTime = this.parseDateTime(currentTime);
+    return this;
+  }
+
+  public givenAggregateRepository<T extends EventSourcedAggregateRoot>(
+    aggregateConstructor: EventSourcedAggregateRootConstructor<T>,
+    repositoryOfFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>> | EventSourcingRepositoryConstructor<T>) {
+    const Constructor: any = (repositoryOfFactory as any);
+    const aggregateTestContext = this.getAggregateTestContext<T>(aggregateConstructor);
+    if (isEventSourcingRepositoryConstructor(Constructor)) {
+      const repository = new Constructor(
+        aggregateTestContext.getEventStore(),
+        this.eventBus,
+        aggregateTestContext.getAggregateFactory(),
+        aggregateTestContext.getEventStreamDecorator(),
+      );
+      aggregateTestContext.setRepository(repository);
+    } else {
+      const repository = this.returnValue(repositoryOfFactory as any);
+      aggregateTestContext.setRepository(repository);
+    }
     return this;
   }
 

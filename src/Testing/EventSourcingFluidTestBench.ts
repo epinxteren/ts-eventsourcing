@@ -3,7 +3,7 @@ import { DomainEvent, DomainEventStream, DomainMessage } from '../Domain';
 import { Identity } from '../Identity';
 import {
   EventSourcedAggregateRoot,
-  EventSourcedAggregateRootConstructor,
+  EventSourcedAggregateRootConstructor, EventSourcingRepositoryConstructor, EventSourcingRepositoryInterface,
 } from '../EventSourcing';
 import { EventSourcingTestBench, ValueOrFactory } from './EventSourcingTestBench';
 import { EventListener } from '../EventHandling';
@@ -41,6 +41,12 @@ export class EventSourcingFluidTestBench {
 
   public givenCurrentTime(currentTime: Date | string): this {
     return this.asyncProxy('givenCurrentTime', currentTime);
+  }
+
+  public givenAggregateRepository<T extends EventSourcedAggregateRoot>(
+    aggregateConstructor: EventSourcedAggregateRootConstructor<T>,
+    repositoryOfFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>> | EventSourcingRepositoryConstructor<T>) {
+    return this.asyncProxy('givenAggregateRepository', aggregateConstructor, repositoryOfFactory);
   }
 
   public whenTimeChanges(currentTime: Date | string): this {

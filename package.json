@@ -1,9 +1,8 @@
 {
   "name": "ts-eventsourcing",
   "private": false,
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Typed event sourcing framework",
-  "main": "src",
   "scripts": {
     "prepublish": "tsc",
     "watch": "tsc --watch",

@@ -31,3 +31,17 @@ export class EventSourcingRepository<AggregateClass extends EventSourcedAggregat
   }
 
 }
+
+export type EventSourcingRepositoryConstructor<AggregateClass extends EventSourcedAggregateRoot> = new (
+  eventStore: EventStore,
+  eventBus: DomainEventBus,
+  aggregateFactory: EventSourcedAggregateFactory<AggregateClass>,
+  streamDecorator: DomainEventStreamDecorator
+) => EventSourcingRepository<AggregateClass>;
+
+export function isEventSourcingRepositoryConstructor(value: any): value is EventSourcingRepositoryConstructor<any> {
+  return typeof value === 'function' &&
+  typeof value.prototype === 'object' &&
+  typeof value.prototype.load === 'function' &&
+  typeof value.prototype.save === 'function';
+}

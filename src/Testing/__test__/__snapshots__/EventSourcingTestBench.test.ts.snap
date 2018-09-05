@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`givenCommandHandler should be able to give own repository by default constructor interface 1`] = `
+TestRepository {
+  "aggregateFactory": SimpleEventSourcedAggregateFactory {
+    "aggregate": [Function],
+  },
+  "eventBus": RecordDomainEventBusDecorator {
+    "bus": AsynchronousDomainEventBus {
+      "activeStreamSubscription": null,
+      "errorHandler": undefined,
+      "eventHandlersMappedByEvent": Object {},
+      "isProcessing": false,
+      "isProcessingSubject": Subject {
+        "_isScalar": false,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "onComplete": [Function],
+      "queue": Array [],
+    },
+    "messages": Array [],
+  },
+  "eventStore": InMemoryEventStore {
+    "events": Object {},
+  },
+  "streamDecorator": AggregateDomainEventStreamDecorator {
+    "decorators": Array [
+      OverrideDateDomainEventStreamDecorator {
+        "getDate": [Function],
+      },
+    ],
+  },
+}
+`;
