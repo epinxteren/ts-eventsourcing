@@ -4,6 +4,7 @@
     "removeComments": false,
     "noLib": false,
     "target": "es2017",
+    "outDir": "./build",
 
     /* Basic Options */
     "skipLibCheck": true,                     /* Skip type checking of declaration files.  */
@@ -32,6 +33,5 @@
   },
   "include": [
     "src/**/*",
-    "index.ts"
   ]
 }

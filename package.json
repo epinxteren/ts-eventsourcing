@@ -3,7 +3,8 @@
   "private": false,
   "version": "1.0.6",
   "description": "Typed event sourcing framework",
-  "main": "src/index.ts",
+  "main": "build/index.ts",
+  "types": "build/index.d.ts",
   "scripts": {
     "prepublish": "tsc",
     "watch": "tsc --watch",
