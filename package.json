@@ -1,8 +1,9 @@
 {
   "name": "ts-eventsourcing",
   "private": false,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Typed event sourcing framework",
+  "main": "src/index.ts",
   "scripts": {
     "prepublish": "tsc",
     "watch": "tsc --watch",
