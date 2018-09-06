@@ -2,21 +2,25 @@ import { SimpleCommandBus, CommandBus, CommandHandler, Command } from '../Comman
 import {
   EventSourcedAggregateRoot,
   EventSourcedAggregateRootConstructor,
-  EventSourcingRepositoryInterface, isEventSourcingRepositoryConstructor,
+  EventSourcingRepositoryInterface,
+  EventSourcingRepositoryConstructor,
+  isEventSourcingRepositoryConstructor,
 } from '../EventSourcing';
-import { AsynchronousDomainEventBus, DomainEventBus, EventListener } from '../EventHandling';
+import {
+  AsynchronousDomainEventBus,
+  DomainEventBus,
+  EventListener,
+  RecordDomainEventBusDecorator,
+} from '../EventHandling';
 import { AggregateTestContextCollection } from './Context/AggregateTestContextCollection';
-import { EventSourcingFluidTestBench } from './EventSourcingFluidTestBench';
-import { RecordDomainEventBusDecorator } from '../EventHandling/DomainEventBus/RecordDomainEventBusDecorator';
-import { DomainEvent, DomainMessage, SimpleDomainEventStream } from '../Domain';
-import { Identity } from '../Identity';
-import { DomainEventStream } from '../Domain';
-import { DomainMessageTestFactory } from './DomainMessageTestFactory';
 import { ReadModelTestContextCollection } from './Context/ReadModelTestContextCollection';
+import { EventSourcingFluidTestBench } from './EventSourcingFluidTestBench';
+import { DomainEvent, DomainMessage, SimpleDomainEventStream, DomainEventStream } from '../Domain';
+import { Identity } from '../Identity';
+import { DomainMessageTestFactory } from './DomainMessageTestFactory';
 import { ReadModel, ReadModelConstructor, Repository } from '../ReadModel';
 import { ReadModelTestContext } from './Context/ReadModelTestContext';
 import * as moment from 'moment';
-import { EventSourcingRepositoryConstructor } from '../EventSourcing/Repository/EventSourcingRepository';
 
 export type ValueOrFactory<T> = T | ((testBench: EventSourcingTestBench) => T);
 
@@ -76,8 +80,8 @@ export class EventSourcingTestBench {
 
   public givenAggregateRepository<T extends EventSourcedAggregateRoot>(
     aggregateConstructor: EventSourcedAggregateRootConstructor<T>,
-    repositoryOfFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>> | EventSourcingRepositoryConstructor<T>) {
-    const Constructor: any = (repositoryOfFactory as any);
+    repositoryOrFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>> | EventSourcingRepositoryConstructor<T>) {
+    const Constructor: any = (repositoryOrFactory as any);
     const aggregateTestContext = this.getAggregateTestContext<T>(aggregateConstructor);
     if (isEventSourcingRepositoryConstructor(Constructor)) {
       const repository = new Constructor(
@@ -88,7 +92,7 @@ export class EventSourcingTestBench {
       );
       aggregateTestContext.setRepository(repository);
     } else {
-      const repository = this.returnValue(repositoryOfFactory as any);
+      const repository = this.returnValue(repositoryOrFactory as any);
       aggregateTestContext.setRepository(repository);
     }
     return this;
@@ -171,6 +175,14 @@ export class EventSourcingTestBench {
     return this.getAggregateTestContext<T>(aggregateConstructor).getEventStore();
   }
 
+  public getEventStreamDecorator<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>) {
+    return this.getAggregateTestContext<T>(aggregateConstructor).getEventStreamDecorator();
+  }
+
+  public getAggregateFactory<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>) {
+    return this.getAggregateTestContext<T>(aggregateConstructor).getAggregateFactory();
+  }
+
   public getReadModelRepository<T extends ReadModel>(readModelConstructor: ReadModelConstructor<T>): Repository<T> {
     return this.getReadModelTestContext<T>(readModelConstructor).getRepository();
   }
@@ -194,6 +206,10 @@ export class EventSourcingTestBench {
 
   public getCurrentTime(): Date {
     return this.currentTime;
+  }
+
+  public getEventBus(): DomainEventBus {
+    return this.eventBus;
   }
 
   protected parseDateTime(date: Date | string): Date {

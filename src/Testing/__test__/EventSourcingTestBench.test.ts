@@ -328,12 +328,11 @@ describe('givenCommandHandler should be able to give own repository', () => {
     const testBench = EventSourcingTestBench
       .create()
       .givenAggregateRepository(TestAggregate, (tb) => {
-        const context = tb.getAggregateTestContext(TestAggregate);
         return new TestRepository(
-          context.getEventStore(),
-          tb.eventBus,
-          context.getAggregateFactory(),
-          context.getEventStreamDecorator(),
+          tb.getEventStore(TestAggregate),
+          tb.getEventBus(),
+          tb.getAggregateFactory(TestAggregate),
+          tb.getEventStreamDecorator(TestAggregate),
         );
       });
     expect(testBench.getAggregateRepository(TestAggregate)).toBeInstanceOf(TestRepository);

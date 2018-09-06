@@ -45,8 +45,8 @@ export class EventSourcingFluidTestBench {
 
   public givenAggregateRepository<T extends EventSourcedAggregateRoot>(
     aggregateConstructor: EventSourcedAggregateRootConstructor<T>,
-    repositoryOfFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>> | EventSourcingRepositoryConstructor<T>) {
-    return this.asyncProxy('givenAggregateRepository', aggregateConstructor, repositoryOfFactory);
+    repositoryOrFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>> | EventSourcingRepositoryConstructor<T>) {
+    return this.asyncProxy('givenAggregateRepository', aggregateConstructor, repositoryOrFactory);
   }
 
   public whenTimeChanges(currentTime: Date | string): this {
