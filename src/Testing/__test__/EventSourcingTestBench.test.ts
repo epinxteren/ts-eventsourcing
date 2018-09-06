@@ -15,26 +15,26 @@ describe('givenCommandHandler should register commandHandler to the command bus'
 
   }
 
-  it('by value', () => {
+  it('by value', async () => {
     const testBench = new EventSourcingTestBench();
     const spy = jest.spyOn(testBench.commandBus, 'subscribe');
     const commandHandler = new TestCommandHandler();
-    testBench.givenCommandHandler(commandHandler);
+    await testBench.givenCommandHandler(commandHandler);
     expect(spy).toBeCalledWith(commandHandler);
   });
 
-  it('by callback', () => {
+  it('by callback', async () => {
     const testBench = new EventSourcingTestBench();
     const spy = jest.spyOn(testBench.commandBus, 'subscribe');
     const commandHandler = new TestCommandHandler();
-    testBench.givenCommandHandler(() => commandHandler);
+    await testBench.givenCommandHandler(() => commandHandler);
     expect(spy).toBeCalledWith(commandHandler);
   });
 
 });
 
 describe('givenEventListener should be registered to the event bus', () => {
-  it('by value', () => {
+  it('by value', async () => {
     const testBench = new EventSourcingTestBench();
 
     class TestEventListener implements EventListener {
@@ -43,11 +43,11 @@ describe('givenEventListener should be registered to the event bus', () => {
 
     const spy = jest.spyOn(testBench.eventBus, 'subscribe');
     const eventListener = new TestEventListener();
-    testBench.givenEventListener(eventListener);
+    await testBench.givenEventListener(eventListener);
     expect(spy).toBeCalledWith(eventListener);
   });
 
-  it('by callback', () => {
+  it('by callback', async () => {
     const testBench = new EventSourcingTestBench();
 
     class TestEventListener implements EventListener {
@@ -56,7 +56,7 @@ describe('givenEventListener should be registered to the event bus', () => {
 
     const spy = jest.spyOn(testBench.eventBus, 'subscribe');
     const eventListener = new TestEventListener();
-    testBench.givenEventListener(() => eventListener);
+    await testBench.givenEventListener(() => eventListener);
     expect(spy).toBeCalledWith(eventListener);
   });
 });
@@ -286,18 +286,14 @@ describe('Should validate date', () => {
     }).toThrow();
   });
 
-  it('By givenCurrentTime', () => {
+  it('By givenCurrentTime', async () => {
     const testBench = new EventSourcingTestBench();
-    expect(() => {
-      testBench.givenCurrentTime('not valid');
-    }).toThrow();
+    await expect(testBench.givenCurrentTime('not valid')).rejects.toThrow();
   });
 
-  it('By whenTimeChanges', () => {
+  it('By whenTimeChanges', async () => {
     const testBench = new EventSourcingTestBench();
-    expect(() => {
-      testBench.whenTimeChanges('not valid');
-    }).toThrow();
+    await expect(testBench.whenTimeChanges('not valid')).rejects.toThrow();
   });
 
 });
@@ -311,7 +307,7 @@ describe('givenCommandHandler should be able to give own repository', () => {
   class TestRepository extends EventSourcingRepository<TestAggregate> {
   }
 
-  it('by value', () => {
+  it('by value', async () => {
     const testBench = new EventSourcingTestBench();
     const context = testBench.getAggregateTestContext(TestAggregate);
     const repository = new TestRepository(
@@ -320,12 +316,12 @@ describe('givenCommandHandler should be able to give own repository', () => {
       context.getAggregateFactory(),
       context.getEventStreamDecorator(),
     );
-    testBench.givenAggregateRepository(TestAggregate, repository);
+    await testBench.givenAggregateRepository(TestAggregate, repository);
     expect(testBench.getAggregateRepository(TestAggregate)).toBe(repository);
   });
 
-  it('by callback factory', () => {
-    const testBench = EventSourcingTestBench
+  it('by callback factory', async () => {
+    const testBench = await EventSourcingTestBench
       .create()
       .givenAggregateRepository(TestAggregate, (tb) => {
         return new TestRepository(
@@ -338,12 +334,81 @@ describe('givenCommandHandler should be able to give own repository', () => {
     expect(testBench.getAggregateRepository(TestAggregate)).toBeInstanceOf(TestRepository);
   });
 
-  it('by default constructor interface', () => {
-    const testBench = EventSourcingTestBench
+  it('by default constructor interface', async () => {
+    const testBench = await EventSourcingTestBench
       .create()
       .givenAggregateRepository(TestAggregate, TestRepository);
     expect(testBench.getAggregateRepository(TestAggregate)).toBeInstanceOf(TestRepository);
     expect(testBench.getAggregateRepository(TestAggregate)).toMatchSnapshot();
+  });
+
+});
+
+it('Can be extended', async () => {
+
+  const spy = jest.fn();
+
+  class MyEventSourcingTestBench extends EventSourcingTestBench {
+    public static create(currentTime?: Date | string) {
+      return new this(currentTime);
+    }
+
+    public givenTheFollowingTest(): this {
+      spy('MyEventSourcingTestBench');
+      return this;
+    }
+
+  }
+
+  class TestAggregate extends EventSourcedAggregateRoot {
+
+  }
+
+  const testBench = await MyEventSourcingTestBench
+    .create()
+    .givenTheFollowingTest();
+
+  await testBench.given(Identity.create(), TestAggregate, [])
+                 .givenTheFollowingTest();
+
+  expect(spy).toBeCalledWith('MyEventSourcingTestBench');
+});
+
+describe('Should handle rejections', () => {
+  class MyThrowTestBench extends EventSourcingTestBench {
+    public static create(currentTime?: Date | string) {
+      return new this(currentTime);
+    }
+
+    public givenReject() {
+      return this.addPending(() => {
+        return Promise.reject('Pew!');
+      });
+    }
+
+    public givenResolve() {
+      return this.addPending(() => {
+        return Promise.resolve('missed!');
+      });
+    }
+  }
+
+  it('should be able to catch exceptions', () => {
+    return expect(MyThrowTestBench.create().givenReject()).rejects.toBe('Pew!');
+  });
+
+  it('should be able to catch', async () => {
+    const testBench = new MyThrowTestBench();
+    const spy = jest.fn();
+    await testBench.givenReject().catch(spy);
+    expect(spy).toBeCalled();
+  });
+
+  it('should be able to try to catch exceptions when there are none', async () => {
+    const testBench = new MyThrowTestBench();
+    const spy = jest.fn();
+    await testBench.givenResolve().catch(spy);
+    expect(spy).not.toBeCalled();
   });
 
 });

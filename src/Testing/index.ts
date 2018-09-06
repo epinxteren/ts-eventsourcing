@@ -1,6 +1,5 @@
 export * from './DomainMessageTestFactory';
 export * from './EventSourcingTestBench';
-export * from './EventSourcingFluidTestBench';
 
 // Context
 

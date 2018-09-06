@@ -14,7 +14,6 @@ import {
 } from '../EventHandling';
 import { AggregateTestContextCollection } from './Context/AggregateTestContextCollection';
 import { ReadModelTestContextCollection } from './Context/ReadModelTestContextCollection';
-import { EventSourcingFluidTestBench } from './EventSourcingFluidTestBench';
 import { DomainEvent, DomainMessage, SimpleDomainEventStream, DomainEventStream } from '../Domain';
 import { Identity } from '../Identity';
 import { DomainMessageTestFactory } from './DomainMessageTestFactory';
@@ -22,7 +21,7 @@ import { ReadModel, ReadModelConstructor, Repository } from '../ReadModel';
 import { ReadModelTestContext } from './Context/ReadModelTestContext';
 import * as moment from 'moment';
 
-export type ValueOrFactory<T> = T | ((testBench: EventSourcingTestBench) => T);
+export type ValueOrFactory<T, TB> = T | ((testBench: TB) => T);
 
 export class EventSourcingTestBench {
   public static readonly defaultCurrentTime: Date = moment(0).toDate();
@@ -31,80 +30,91 @@ export class EventSourcingTestBench {
     return new this(currentTime);
   }
 
-  public readonly domainMessageFactory = new DomainMessageTestFactory(this);
+  public readonly domainMessageFactory: DomainMessageTestFactory;
   public readonly commandBus: CommandBus = new SimpleCommandBus();
-  public readonly aggregates = new AggregateTestContextCollection(this);
+  public readonly aggregates: AggregateTestContextCollection;
   public readonly models = new ReadModelTestContextCollection();
   public readonly eventBus: DomainEventBus;
   private readonly asyncBus: AsynchronousDomainEventBus;
   private readonly recordBus: RecordDomainEventBusDecorator;
   private currentTime: Date;
+  private promise: Promise<void>;
 
   constructor(currentTime: Date | string = EventSourcingTestBench.defaultCurrentTime) {
     this.currentTime = this.parseDateTime(currentTime);
     this.asyncBus = new AsynchronousDomainEventBus();
     this.recordBus = new RecordDomainEventBusDecorator(this.asyncBus);
     this.eventBus = this.recordBus;
+    this.aggregates = new AggregateTestContextCollection(this);
+    this.domainMessageFactory = new DomainMessageTestFactory(this);
+    this.promise = Promise.resolve();
   }
 
-  public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler>): this {
-    const handler = this.returnValue(createOrHandler);
-    this.commandBus.subscribe(handler);
-    return this;
+  public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler, this>) {
+    return this.addTask(async () => {
+      const handler = this.returnValue(createOrHandler);
+      this.commandBus.subscribe(handler);
+    });
   }
 
-  public givenEventListener(createOrEventListener: EventListener | ((testBench: EventSourcingTestBench) => EventListener)): this {
-    const listener = this.returnValue(createOrEventListener);
-    this.eventBus.subscribe(listener);
-    return this;
+  public givenEventListener(createOrEventListener: EventListener | ((testBench: this) => EventListener)) {
+    return this.addTask(async () => {
+      const listener = this.returnValue(createOrEventListener);
+      this.eventBus.subscribe(listener);
+    });
   }
 
-  public givenSpies(assignSpies: ((testBench: EventSourcingTestBench) => void | Promise<void>)): EventSourcingFluidTestBench {
-    return this.makeFluid(async () => assignSpies(this));
+  public givenSpies(assignSpies: ((testBench: this) => void | Promise<void>)) {
+    return this.addTask(async () => assignSpies(this));
   }
 
   public given<T extends EventSourcedAggregateRoot>(
     id: Identity,
     aggregateClass: EventSourcedAggregateRootConstructor<T>,
-    events: DomainEvent[]): EventSourcingFluidTestBench {
-    const context = this.aggregates.getByConstructor(aggregateClass);
-    const domainMessages = this.domainMessageFactory.createDomainMessages(id, events);
-    const stream = SimpleDomainEventStream.of(domainMessages);
-    return this.makeFluid(() => context.getEventStore().append(id, stream));
+    events: DomainEvent[]) {
+    return this.addTask(async () => {
+      const context = this.aggregates.getByConstructor(aggregateClass);
+      const domainMessages = this.domainMessageFactory.createDomainMessages(id, events);
+      const stream = SimpleDomainEventStream.of(domainMessages);
+      return context.getEventStore().append(id, stream);
+    });
   }
 
   public givenCurrentTime(currentTime: Date | string) {
-    this.currentTime = this.parseDateTime(currentTime);
-    return this;
+    return this.addTask(async () => {
+      this.currentTime = this.parseDateTime(currentTime);
+    });
   }
 
   public givenAggregateRepository<T extends EventSourcedAggregateRoot>(
     aggregateConstructor: EventSourcedAggregateRootConstructor<T>,
-    repositoryOrFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>> | EventSourcingRepositoryConstructor<T>) {
-    const Constructor: any = (repositoryOrFactory as any);
-    const aggregateTestContext = this.getAggregateTestContext<T>(aggregateConstructor);
-    if (isEventSourcingRepositoryConstructor(Constructor)) {
-      const repository = new Constructor(
-        aggregateTestContext.getEventStore(),
-        this.eventBus,
-        aggregateTestContext.getAggregateFactory(),
-        aggregateTestContext.getEventStreamDecorator(),
-      );
-      aggregateTestContext.setRepository(repository);
-    } else {
-      const repository = this.returnValue(repositoryOrFactory as any);
-      aggregateTestContext.setRepository(repository);
-    }
-    return this;
+    repositoryOrFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>, this> | EventSourcingRepositoryConstructor<T>) {
+    return this.addTask(async () => {
+      const Constructor: any = (repositoryOrFactory as any);
+      const aggregateTestContext = this.getAggregateTestContext<T>(aggregateConstructor);
+      if (isEventSourcingRepositoryConstructor(Constructor)) {
+        const repository = new Constructor(
+          aggregateTestContext.getEventStore(),
+          this.eventBus,
+          aggregateTestContext.getAggregateFactory(),
+          aggregateTestContext.getEventStreamDecorator(),
+        );
+        aggregateTestContext.setRepository(repository);
+      } else {
+        const repository = this.returnValue(repositoryOrFactory as any);
+        aggregateTestContext.setRepository(repository);
+      }
+    });
   }
 
   public whenTimeChanges(currentTime: Date | string) {
-    this.currentTime = this.parseDateTime(currentTime);
-    return this;
+    return this.addTask(async () => {
+      this.currentTime = this.parseDateTime(currentTime);
+    });
   }
 
-  public whenCommands(commands: Command[]): EventSourcingFluidTestBench {
-    return this.makeFluid(async () => {
+  public whenCommands(commands: Command[]): this {
+    return this.addTask(async () => {
       for (const command of commands) {
         await this.commandBus.dispatch(command);
       }
@@ -112,9 +122,10 @@ export class EventSourcingTestBench {
   }
 
   public whenDomainMessagesHappened(messages: DomainMessage[] | DomainEventStream): this {
-    const stream = messages instanceof Array ? SimpleDomainEventStream.of(messages) : messages;
-    this.eventBus.publish(stream);
-    return this;
+    return this.addTask(async () => {
+      const stream = messages instanceof Array ? SimpleDomainEventStream.of(messages) : messages;
+      this.eventBus.publish(stream);
+    });
   }
 
   public whenEventsHappened(id: Identity, events: DomainEvent[]): this {
@@ -122,8 +133,8 @@ export class EventSourcingTestBench {
     return this.whenDomainMessagesHappened(messages);
   }
 
-  public thenMatchEvents(events: Array<DomainEvent | DomainMessage>): EventSourcingFluidTestBench {
-    return this.makeFluid(async () => {
+  public thenMatchEvents(events: Array<DomainEvent | DomainMessage>): this {
+    return this.addTask(async () => {
       const messages = await this.getRecordedMessages();
       const actualEvents = messages.map((message, index) => {
         if (events[index] instanceof DomainMessage) {
@@ -135,8 +146,8 @@ export class EventSourcingTestBench {
     });
   }
 
-  public thenModelsShouldMatch<T extends ReadModel>(modelsOrFactory: ValueOrFactory<T[]>): EventSourcingFluidTestBench {
-    return this.makeFluid(async () => {
+  public thenModelsShouldMatch<T extends ReadModel>(modelsOrFactory: ValueOrFactory<T[], this>): this {
+    return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
       const models = this.returnValue(modelsOrFactory);
       for (const model of models) {
@@ -150,9 +161,9 @@ export class EventSourcingTestBench {
   public thenAssertModel<T extends ReadModel>(
     modelClass: ReadModelConstructor<T>,
     id: Identity,
-    matcher: (model: T, testBench: EventSourcingTestBench) => Promise<void> | void,
-  ): EventSourcingFluidTestBench {
-    return this.makeFluid(async () => {
+    matcher: (model: T, testBench: this) => Promise<void> | void,
+  ): this {
+    return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
       const repository = this.models.getByConstructor(modelClass).getRepository();
       const model = await repository.get(id);
@@ -160,8 +171,8 @@ export class EventSourcingTestBench {
     });
   }
 
-  public thenAssert(asserting: (testBench: EventSourcingTestBench) => Promise<void> | void): EventSourcingFluidTestBench {
-    return this.makeFluid(async () => {
+  public thenAssert(asserting: (testBench: this) => Promise<void> | void): this {
+    return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
       await asserting(this);
     });
@@ -220,12 +231,52 @@ export class EventSourcingTestBench {
     return parsed.toDate();
   }
 
-  protected returnValue<T>(valueOrFactory: ValueOrFactory<T>): T {
+  protected returnValue<T>(valueOrFactory: ValueOrFactory<T, this>): T {
     return typeof valueOrFactory === 'function' ? valueOrFactory(this) : valueOrFactory;
   }
 
-  protected makeFluid(pending: () => Promise<void>): EventSourcingFluidTestBench {
-    return new EventSourcingFluidTestBench(this, pending);
+  protected addTask(pending: () => Promise<void>): this {
+    return this.addPending(pending);
+  }
+
+  protected addPending(pending: () => Promise<any>): this & Promise<this> {
+    this.promise = this.promise.then(pending);
+    // next in chain.
+    if (typeof (this as any).then === 'function' ||
+      typeof (this as any).catch === 'function') {
+      return this as any;
+    }
+
+    function EventSourcingFluidTestBenchWrapper() {
+      // nothing
+    }
+
+    (EventSourcingFluidTestBenchWrapper as any).prototype = this;
+    const fluidTestBench: any = new (EventSourcingFluidTestBenchWrapper as any)();
+    fluidTestBench.then = this.thenPromise.bind(this);
+    fluidTestBench.catch = this.catchPromise.bind(this);
+    return fluidTestBench as any;
+  }
+
+  private thenPromise<TResult1 = this, TResult2 = never>(onfulfilled?: ((value: this) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
+    return this.promise.then(async () => {
+      this.promise = Promise.resolve();
+      await this.thenWaitUntilProcessed();
+      return this;
+    }).then(onfulfilled, onrejected);
+  }
+
+  private catchPromise<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<any | TResult> {
+    const promise = async () => {
+      await this.promise;
+      this.promise = Promise.resolve();
+      await this.thenWaitUntilProcessed();
+      return this;
+    };
+    return promise().catch((e: any) => {
+      this.promise = Promise.resolve();
+      return Promise.reject(e);
+    }).catch(onrejected);
   }
 
 }
