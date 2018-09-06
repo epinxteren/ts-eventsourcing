@@ -1,15 +1,14 @@
 {
   "name": "ts-eventsourcing",
   "private": false,
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Typed event sourcing framework",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
   "scripts": {
-    "prepublish": "tsc",
+    "prepublish": "yarn test",
     "watch": "tsc --watch",
-    "test": "npm-run-all --parallel jest tslint jscpd prepublish",
+    "test": "npm-run-all --parallel jest tslint jscpd tsc",
     "jest": "jest",
+    "tsc": "tsc",
     "tslint-fix": "tslint --fix --project tsconfig.json",
     "tslint": "tslint --project tsconfig.json",
     "jscpd": "jscpd --limit=-1"

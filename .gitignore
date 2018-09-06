@@ -6,4 +6,3 @@ yarn-error.log
 **/*.map
 src/**/*.js
 index.js
-build
