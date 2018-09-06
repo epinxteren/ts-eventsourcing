@@ -36,7 +36,7 @@ export type EventSourcingRepositoryConstructor<AggregateClass extends EventSourc
   eventStore: EventStore,
   eventBus: DomainEventBus,
   aggregateFactory: EventSourcedAggregateFactory<AggregateClass>,
-  streamDecorator: DomainEventStreamDecorator
+  streamDecorator: DomainEventStreamDecorator,
 ) => EventSourcingRepository<AggregateClass>;
 
 export function isEventSourcingRepositoryConstructor(value: any): value is EventSourcingRepositoryConstructor<any> {

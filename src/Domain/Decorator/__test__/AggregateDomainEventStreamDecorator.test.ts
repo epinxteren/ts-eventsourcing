@@ -49,3 +49,20 @@ it('Can have multiple decorators', () => {
   expect(decorator2.decorate).toBeCalledWith(aggregate, decoratedStream1);
   expect(decorated).toBe(decoratedStream2);
 });
+
+it('Can add decorators', () => {
+  const aggregate: EventSourcedAggregateRoot = jest.fn() as any;
+  const decoratedStream = SimpleDomainEventStream.of([]);
+  const decorator: DomainEventStreamDecorator = {
+    decorate: jest.fn(() => decoratedStream) as any,
+  };
+  const decoratorAggregate = new AggregateDomainEventStreamDecorator([]);
+  decoratorAggregate.add(decorator);
+  const stream = SimpleDomainEventStream.of([]);
+  const decorated = decoratorAggregate.decorate(aggregate, stream);
+  expect(decorated).not.toBe(stream);
+
+  // Check if the single decorator is called with correct arguments.
+  expect(decorator.decorate).toBeCalledWith(aggregate, stream);
+  expect(decorated).toBe(decoratedStream);
+});
