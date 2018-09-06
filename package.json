@@ -1,9 +1,9 @@
 {
   "name": "ts-eventsourcing",
   "private": false,
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Typed event sourcing framework",
-  "main": "build/index.ts",
+  "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
     "prepublish": "tsc",
