@@ -19,7 +19,12 @@ import { Identity } from '../Identity';
 import { DomainMessageTestFactory } from './DomainMessageTestFactory';
 import { ReadModel, ReadModelConstructor, Repository } from '../ReadModel';
 import { ReadModelTestContext } from './Context/ReadModelTestContext';
-import * as moment from 'moment';
+import moment from 'moment';
+
+export interface TestTask {
+  callback: () => Promise<any>;
+  description: string;
+}
 
 export type ValueOrFactory<T, TB> = T | ((testBench: TB) => T);
 
@@ -37,8 +42,9 @@ export class EventSourcingTestBench {
   public readonly eventBus: DomainEventBus;
   private readonly asyncBus: AsynchronousDomainEventBus;
   private readonly recordBus: RecordDomainEventBusDecorator;
+  private breakpoint: boolean = false;
   private currentTime: Date;
-  private promise: Promise<void>;
+  private tasks: TestTask[] = [];
 
   constructor(currentTime: Date | string = EventSourcingTestBench.defaultCurrentTime) {
     this.currentTime = this.parseDateTime(currentTime);
@@ -47,7 +53,6 @@ export class EventSourcingTestBench {
     this.eventBus = this.recordBus;
     this.aggregates = new AggregateTestContextCollection(this);
     this.domainMessageFactory = new DomainMessageTestFactory(this);
-    this.promise = Promise.resolve();
   }
 
   public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler, this>) {
@@ -129,8 +134,10 @@ export class EventSourcingTestBench {
   }
 
   public whenEventsHappened(id: Identity, events: DomainEvent[]): this {
-    const messages = this.domainMessageFactory.createDomainMessages(id, events);
-    return this.whenDomainMessagesHappened(messages);
+    return this.addTask(async () => {
+      const messages = this.domainMessageFactory.createDomainMessages(id, events);
+      this.whenDomainMessagesHappened(messages);
+    });
   }
 
   public thenMatchEvents(events: Array<DomainEvent | DomainMessage>): this {
@@ -206,8 +213,17 @@ export class EventSourcingTestBench {
     return this.aggregates.getByConstructor<T>(aggregateConstructor);
   }
 
-  public async thenWaitUntilProcessed() {
-    await this.asyncBus.untilIdle();
+  public thenWaitUntilProcessed() {
+    return this.addTask(async () => {
+      await this.asyncBus.untilIdle();
+    });
+  }
+
+  /* istanbul ignore next */
+  public thenIPutABeakpoint() {
+    return this.addTask(async () => {
+      this.breakpoint = true;
+    });
   }
 
   public async getRecordedMessages() {
@@ -223,6 +239,21 @@ export class EventSourcingTestBench {
     return this.eventBus;
   }
 
+  /**
+   * This will handle all the synchronously.
+   */
+  public async toPromise() {
+    const tasks = this.tasks;
+    this.tasks = [];
+    for (const task of tasks) {
+      // The task name for easy referencing.
+      const name = task.description;
+      await this.handleTask(name, task.callback);
+      // Handle all tasks created by the previous task.
+      await this.toPromise();
+    }
+  }
+
   protected parseDateTime(date: Date | string): Date {
     const parsed = moment(date);
     if (!parsed.isValid()) {
@@ -235,48 +266,40 @@ export class EventSourcingTestBench {
     return typeof valueOrFactory === 'function' ? valueOrFactory(this) : valueOrFactory;
   }
 
-  protected addTask(pending: () => Promise<void>): this {
-    return this.addPending(pending);
+  protected addTask(callback: () => Promise<any>): this {
+    const stack = new Error().stack;
+    /* istanbul ignore next */
+    const caller = stack ? stack.split('\n')[2].trim() : 'unknown';
+    return this.addPending({ description: caller, callback });
   }
 
-  protected addPending(pending: () => Promise<any>): this & Promise<this> {
-    this.promise = this.promise.then(pending);
+  /* tslint:disable:no-debugger */
+  protected async handleTask(_taskDescription: string, callback: () => Promise<void>) {
+    /* istanbul ignore next */
+    if (this.breakpoint) {
+      this.breakpoint = false;
+      debugger;
+    }
+    // Step into to see what the current task is doing.
+    await callback.call(this);
+  }
+
+  private addPending(pending: TestTask): this & Promise<this> {
+    this.tasks.push(pending);
     // next in chain.
-    if (typeof (this as any).then === 'function' ||
-      typeof (this as any).catch === 'function') {
+    if (typeof (this as any).then === 'function') {
       return this as any;
     }
 
-    function EventSourcingFluidTestBenchWrapper() {
-      // nothing
-    }
-
-    (EventSourcingFluidTestBenchWrapper as any).prototype = this;
-    const fluidTestBench: any = new (EventSourcingFluidTestBenchWrapper as any)();
-    fluidTestBench.then = this.thenPromise.bind(this);
-    fluidTestBench.catch = this.catchPromise.bind(this);
-    return fluidTestBench as any;
+    (this as any).then = this.thenPromise.bind(this);
+    return this as any;
   }
 
   private thenPromise<TResult1 = this, TResult2 = never>(onfulfilled?: ((value: this) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): Promise<TResult1 | TResult2> {
-    return this.promise.then(async () => {
-      this.promise = Promise.resolve();
-      await this.thenWaitUntilProcessed();
+    return this.toPromise().then(() => {
+      // remove promise function, so it can be returned.
+      (this as any).then = undefined;
       return this;
     }).then(onfulfilled, onrejected);
   }
-
-  private catchPromise<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): Promise<any | TResult> {
-    const promise = async () => {
-      await this.promise;
-      this.promise = Promise.resolve();
-      await this.thenWaitUntilProcessed();
-      return this;
-    };
-    return promise().catch((e: any) => {
-      this.promise = Promise.resolve();
-      return Promise.reject(e);
-    }).catch(onrejected);
-  }
-
 }

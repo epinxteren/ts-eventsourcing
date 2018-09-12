@@ -256,7 +256,7 @@ describe('whenDomainMessagesHappened should dispatch messages on event bus', () 
   });
 });
 
-it('whenEventsHappened should create messages and call whenDomainMessagesHappened', () => {
+it('whenEventsHappened should create messages and call whenDomainMessagesHappened', async () => {
   class TestEvent implements DomainEvent {
 
   }
@@ -265,7 +265,7 @@ it('whenEventsHappened should create messages and call whenDomainMessagesHappene
   testBench.domainMessageFactory.createDomainMessages = jest.fn().mockReturnValueOnce('stub stream');
   testBench.whenDomainMessagesHappened = jest.fn();
   const id = Identity.create();
-  testBench.whenEventsHappened(id, [new TestEvent()]);
+  await testBench.whenEventsHappened(id, [new TestEvent()]);
 
   expect(testBench.domainMessageFactory.createDomainMessages).toBeCalledWith(id, [new TestEvent()]);
   expect(testBench.whenDomainMessagesHappened).toBeCalledWith('stub stream');
@@ -381,13 +381,13 @@ describe('Should handle rejections', () => {
     }
 
     public givenReject() {
-      return this.addPending(() => {
+      return this.addTask(() => {
         return Promise.reject('Pew!');
       });
     }
 
     public givenResolve() {
-      return this.addPending(() => {
+      return this.addTask(() => {
         return Promise.resolve('missed!');
       });
     }
@@ -400,14 +400,18 @@ describe('Should handle rejections', () => {
   it('should be able to catch', async () => {
     const testBench = new MyThrowTestBench();
     const spy = jest.fn();
-    await testBench.givenReject().catch(spy);
+    try {
+      await testBench.givenReject();
+    } catch (e) {
+      spy(e);
+    }
     expect(spy).toBeCalled();
   });
 
   it('should be able to try to catch exceptions when there are none', async () => {
     const testBench = new MyThrowTestBench();
     const spy = jest.fn();
-    await testBench.givenResolve().catch(spy);
+    await testBench.givenResolve().toPromise().catch(spy);
     expect(spy).not.toBeCalled();
   });
 

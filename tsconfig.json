@@ -5,7 +5,8 @@
     "noLib": false,
     "target": "es2017",
     "outDir": "./build",
-    "noEmit": true,
+    "importHelpers": true,
+    "esModuleInterop": true,
 
     /* Basic Options */
     "skipLibCheck": true,                     /* Skip type checking of declaration files.  */
