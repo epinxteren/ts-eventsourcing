@@ -266,7 +266,7 @@ export class EventSourcingTestBench {
     return typeof valueOrFactory === 'function' ? valueOrFactory(this) : valueOrFactory;
   }
 
-  protected addTask(callback: () => Promise<any>): this {
+  protected addTask(callback: () => Promise<void>): this {
     const stack = new Error().stack;
     /* istanbul ignore next */
     const caller = stack ? stack.split('\n')[2].trim() : 'unknown';

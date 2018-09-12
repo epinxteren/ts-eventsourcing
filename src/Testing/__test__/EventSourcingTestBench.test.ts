@@ -1,7 +1,7 @@
 /* tslint:disable:max-classes-per-file */
 
 import { EventSourcingTestBench } from '../EventSourcingTestBench';
-import { Command, CommandHandler } from '../../CommandHandling';
+import { Command, CommandHandler, HandleCommand } from '../../CommandHandling';
 import { EventListener } from '../../EventHandling';
 import { Identity } from '../../Identity';
 import {
@@ -11,7 +11,17 @@ import {
 import { DomainEvent, DomainEventStream, DomainMessage, SimpleDomainEventStream } from '../../Domain';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
+
+  class TestCommand implements Command {
+
+  }
+
   class TestCommandHandler implements CommandHandler {
+
+    @HandleCommand
+    public handle(_command: TestCommand) {
+      // Does nothing.
+    }
 
   }
 
@@ -388,7 +398,7 @@ describe('Should handle rejections', () => {
 
     public givenResolve() {
       return this.addTask(() => {
-        return Promise.resolve('missed!');
+        return Promise.resolve();
       });
     }
   }

@@ -12,7 +12,10 @@ export interface CommandHandlerMetadata {
 
 export function getHandleCommandMetadata(target: CommandHandler): CommandHandlerMetadata[] {
   const metadata = Reflect.getMetadata(COMMAND_HANDLER_FUNCTIONS, target.constructor);
-  return metadata ? metadata : [];
+  if (!metadata) {
+    throw IncorrectCommandHandlerError.missingHandler(target);
+  }
+  return metadata;
 }
 
 export function HandleCommand(target: any, key: string): void {

@@ -78,3 +78,11 @@ it('Should have an argument', () => {
     return new TestCommandHandler();
   }).toThrow(IncorrectCommandHandlerError);
 });
+
+it('Should have an handle function', () => {
+  class TestCommandHandler implements CommandHandler {
+  }
+  expect(() => {
+    getHandleCommandMetadata(new TestCommandHandler());
+  }).toThrow(IncorrectCommandHandlerError);
+});
