@@ -4,7 +4,7 @@ import { IncorrectDomainEventHandlerError } from './Error/IncorrectDomainEventHa
 import { DomainEventConstructor, DomainMessage } from '../Domain';
 import { ClassUtil } from '../ClassUtil';
 
-const EVENT_HANDLER_FUNCTIONS = 'event:handler:functions';
+const EVENT_HANDLERS = Symbol.for('event_handlers');
 
 export interface DomainEventHandlerMetadata {
   functionName: string;
@@ -13,14 +13,14 @@ export interface DomainEventHandlerMetadata {
 }
 
 export function allHandleDomainEventMetadata(target: EventListener): DomainEventHandlerMetadata[] {
-  const metadata = Reflect.getMetadata(EVENT_HANDLER_FUNCTIONS, target.constructor);
+  const metadata = Reflect.getMetadata(EVENT_HANDLERS, target.constructor);
   return metadata ? metadata : [];
 }
 
 export function HandleDomainEvent(target: { constructor: EventListenerConstructor } | any, functionName: string): void {
   const constructor = target.constructor;
   const types = Reflect.getMetadata('design:paramtypes', target, functionName);
-  let handlers: DomainEventHandlerMetadata[] = Reflect.getMetadata(EVENT_HANDLER_FUNCTIONS, constructor);
+  let handlers: DomainEventHandlerMetadata[] = Reflect.getMetadata(EVENT_HANDLERS, constructor);
   handlers = handlers ? handlers : [];
 
   if (types.length > 2) {
@@ -40,5 +40,5 @@ export function HandleDomainEvent(target: { constructor: EventListenerConstructo
     eventArgumentIndex,
   });
 
-  Reflect.defineMetadata(EVENT_HANDLER_FUNCTIONS, handlers, constructor);
+  Reflect.defineMetadata(EVENT_HANDLERS, handlers, constructor);
 }

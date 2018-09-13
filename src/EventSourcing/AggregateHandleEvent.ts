@@ -4,7 +4,7 @@ import { EventSourcedEntity } from './EventSourcedEntity';
 import { IncorrectEventHandlerError } from './Error/IncorrectEventHandlerError';
 import { EventListenerConstructor } from '../EventHandling';
 
-const EVENT_HANDLER_FUNCTIONS = 'event_sourced_entity:event:handler:functions';
+const AGGREGATE_EVENT_HANDLER = Symbol.for('aggregate_handler');
 
 export interface EventHandlerMetadata {
   functionName: string;
@@ -12,14 +12,14 @@ export interface EventHandlerMetadata {
 }
 
 export function allAggregateEventHandlersMetadata(target: EventSourcedEntity): EventHandlerMetadata[] {
-  const metadata = Reflect.getMetadata(EVENT_HANDLER_FUNCTIONS, target.constructor);
+  const metadata = Reflect.getMetadata(AGGREGATE_EVENT_HANDLER, target.constructor);
   return metadata ? metadata : [];
 }
 
 export function AggregateHandleEvent(target: { constructor: EventListenerConstructor } | any, functionName: string): void {
   const constructor = target.constructor;
   const types = Reflect.getMetadata('design:paramtypes', target, functionName);
-  let handlers: EventHandlerMetadata[] = Reflect.getMetadata(EVENT_HANDLER_FUNCTIONS, constructor);
+  let handlers: EventHandlerMetadata[] = Reflect.getMetadata(AGGREGATE_EVENT_HANDLER, constructor);
   handlers = handlers ? handlers : [];
 
   if (types.length !== 1) {
@@ -31,5 +31,5 @@ export function AggregateHandleEvent(target: { constructor: EventListenerConstru
     event: types[0],
   });
 
-  Reflect.defineMetadata(EVENT_HANDLER_FUNCTIONS, handlers, constructor);
+  Reflect.defineMetadata(AGGREGATE_EVENT_HANDLER, handlers, constructor);
 }
