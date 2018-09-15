@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { CommandConstructor } from './Command';
 import { CommandHandler, CommandHandlerConstructor } from './CommandHandler';
 import { IncorrectCommandHandlerError } from './Error';
+import { Metadata } from '../Metadata';
 
 const COMMAND_HANDLERS = Symbol.for('command_handlers');
 
@@ -11,7 +12,7 @@ export interface CommandHandlerMetadata {
 }
 
 export function getHandleCommandMetadata(target: CommandHandler): CommandHandlerMetadata[] {
-  const metadata = Reflect.getMetadata(COMMAND_HANDLERS, target.constructor);
+  const metadata = Metadata.getMetadata(COMMAND_HANDLERS, target.constructor);
   if (!metadata) {
     throw IncorrectCommandHandlerError.missingHandler(target);
   }
@@ -21,7 +22,7 @@ export function getHandleCommandMetadata(target: CommandHandler): CommandHandler
 export function HandleCommand(target: any, key: string): void {
   const types = Reflect.getMetadata('design:paramtypes', target, key);
   const constructor = target.constructor as CommandHandlerConstructor;
-  let handlers = Reflect.getMetadata(COMMAND_HANDLERS, constructor);
+  let handlers = Metadata.getMetadata(COMMAND_HANDLERS, constructor);
   handlers = handlers ? handlers : [];
 
   if (types.length !== 1) {
@@ -33,5 +34,5 @@ export function HandleCommand(target: any, key: string): void {
     command: types[0],
   });
 
-  Reflect.defineMetadata(COMMAND_HANDLERS, handlers, constructor);
+  Metadata.defineMetadata(COMMAND_HANDLERS, handlers, constructor);
 }
