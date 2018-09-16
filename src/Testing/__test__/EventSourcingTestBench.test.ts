@@ -6,7 +6,7 @@ import { EventListener } from '../../EventHandling';
 import { Identity } from '../../Identity';
 import {
   EventSourcedAggregateRoot,
-  EventSourcingRepository,
+  EventSourcingRepository, EventSourcingRepositoryInterface,
 } from '../../EventSourcing';
 import { DomainEvent, DomainEventStream, DomainMessage, SimpleDomainEventStream } from '../../Domain';
 import { ReadModel, Repository } from '../../ReadModel';
@@ -42,6 +42,77 @@ describe('givenCommandHandler should register commandHandler to the command bus'
     expect(spy).toBeCalledWith(commandHandler);
   });
 
+  it('by constructor', async () => {
+    const spyConstructor = jest.fn();
+
+    class TestAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class TestCommandHandlerWithRepository implements CommandHandler {
+
+      constructor(repository: EventSourcingRepositoryInterface<TestAggregate>) {
+        spyConstructor(repository);
+      }
+
+      @HandleCommand
+      public handle(_command: TestCommand) {
+        // Does nothing.
+      }
+
+    }
+
+    const testBench = new EventSourcingTestBench();
+    const spy = jest.spyOn(testBench.commandBus, 'subscribe');
+    await testBench.givenCommandHandler(TestCommandHandlerWithRepository, [TestAggregate]);
+    expect(spy.mock.calls[0][0]).toBeInstanceOf(TestCommandHandlerWithRepository);
+    expect(spyConstructor).toBeCalledWith(testBench.getAggregateTestContext(TestAggregate).getRepository());
+  });
+
+  it('by constructor with multiple repositories', async () => {
+    const spyConstructor = jest.fn();
+
+    class ProductAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserReadModel implements ReadModel {
+      public getId(): Identity {
+        throw new Error('not implemented');
+      }
+    }
+
+    class TestCommandHandlerWithRepository implements CommandHandler {
+
+      constructor(productRepository: EventSourcingRepositoryInterface<ProductAggregate>,
+                  userRepository: EventSourcingRepositoryInterface<UserAggregate>,
+                  userReadModellRepository: Repository<UserReadModel>) {
+        spyConstructor(productRepository, userRepository, userReadModellRepository);
+      }
+
+      @HandleCommand
+      public handle(_command: TestCommand) {
+        // Does nothing.
+      }
+
+    }
+
+    const testBench = new EventSourcingTestBench();
+    const spy = jest.spyOn(testBench.commandBus, 'subscribe');
+    await testBench.givenCommandHandler(
+      TestCommandHandlerWithRepository, [ProductAggregate, UserAggregate, UserReadModel]);
+    expect(spy.mock.calls[0][0]).toBeInstanceOf(TestCommandHandlerWithRepository);
+    expect(spyConstructor).toBeCalledWith(
+      testBench.getAggregateTestContext(ProductAggregate).getRepository(),
+      testBench.getAggregateTestContext(UserAggregate).getRepository(),
+      testBench.getReadModelTestContext(UserReadModel).getRepository(),
+    );
+  });
+
 });
 
 describe('givenEventListener should be registered to the event bus', () => {
@@ -70,10 +141,49 @@ describe('givenEventListener should be registered to the event bus', () => {
     await testBench.givenEventListener(() => eventListener);
     expect(spy).toBeCalledWith(eventListener);
   });
+
+  it('by constructor with multiple repositories', async () => {
+    const spyConstructor = jest.fn();
+
+    class ProductAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserReadModel implements ReadModel {
+      public getId(): Identity {
+        throw new Error('not implemented');
+      }
+    }
+
+    class TestEventListener implements EventListener {
+
+      constructor(productRepository: EventSourcingRepositoryInterface<ProductAggregate>,
+                  userRepository: EventSourcingRepositoryInterface<UserAggregate>,
+                  userReadModellRepository: Repository<UserReadModel>) {
+        spyConstructor(productRepository, userRepository, userReadModellRepository);
+      }
+
+    }
+
+    const testBench = new EventSourcingTestBench();
+    const spy = jest.spyOn(testBench.eventBus, 'subscribe');
+    await testBench.givenEventListener(TestEventListener, [ProductAggregate, UserAggregate, UserReadModel]);
+    expect(spy.mock.calls[0][0]).toBeInstanceOf(TestEventListener);
+    expect(spyConstructor).toBeCalledWith(
+      testBench.getAggregateTestContext(ProductAggregate).getRepository(),
+      testBench.getAggregateTestContext(UserAggregate).getRepository(),
+      testBench.getReadModelTestContext(UserReadModel).getRepository(),
+    );
+  });
+
 });
 
 describe('should call spy factory', () => {
-  // :) spy to check if can apply spies :).
+  // :) spy to check if it can apply spies :).
   it('sync', async () => {
     const spy = jest.fn();
     const testBench = new EventSourcingTestBench();
@@ -83,10 +193,11 @@ describe('should call spy factory', () => {
 
   it('async', async () => {
     const spy = jest.fn();
-    const testBench = new EventSourcingTestBench();
-    await testBench.givenSpies(async (testBenchArg) => {
-      spy(testBenchArg);
-    });
+    const testBench = await EventSourcingTestBench
+      .create()
+      .givenSpies(async (testBenchArg) => {
+        spy(testBenchArg);
+      });
     expect(spy).toBeCalledWith(testBench);
   });
 });

@@ -1,15 +1,16 @@
-import { SimpleCommandBus, CommandBus, CommandHandler, Command } from '../CommandHandling';
+import { SimpleCommandBus, CommandBus, CommandHandler, Command, CommandHandlerConstructor } from '../CommandHandling';
 import {
   EventSourcedAggregateRoot,
   EventSourcedAggregateRootConstructor,
   EventSourcingRepositoryInterface,
   EventSourcingRepositoryConstructor,
   isEventSourcingRepositoryConstructor,
+  isEventSourcedAggregateRootConstructor,
 } from '../EventSourcing';
 import {
   AsynchronousDomainEventBus,
   DomainEventBus,
-  EventListener,
+  EventListener, EventListenerConstructor,
   RecordDomainEventBusDecorator,
 } from '../EventHandling';
 import { AggregateTestContextCollection } from './Context/AggregateTestContextCollection';
@@ -28,6 +29,14 @@ export interface TestTask {
 
 export type ValueOrFactory<T, TB> = T | ((testBench: TB) => T);
 
+/**
+ * For testing event sourcing related logic.
+ *
+ * - Support for multiple read models, aggregates, listeners and command handlers.
+ * - It has a fluid interface for all function.
+ *
+ * Internally it works as a factory for test tasks. All function return a promise and can be waited for to complete the pending tasks.
+ */
 export class EventSourcingTestBench {
   public static readonly defaultCurrentTime: Date = moment(0).toDate();
 
@@ -55,24 +64,102 @@ export class EventSourcingTestBench {
     this.domainMessageFactory = new DomainMessageTestFactory(this);
   }
 
-  public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler, this>) {
+  /**
+   * Give a command handler and assigned it to the command bus.
+   *
+   * @example
+   *
+   *    // By factory function.
+   *    givenCommandHandler((testBench: EventSourcingTestBench) => {
+   *      return new OrderCommandHandler(testBench.getAggregateRepository(Order));
+   *    })
+   *
+   *    // By constructor. This will inject the aggregate or model repositories as arguments.
+   *    givenCommandHandler(OrderCommandHandler, [Order])
+   *    givenCommandHandler(OrderCommandHandler, [Order, User])
+   *
+   *    // By value
+   *    givenCommandHandler(new OrderCommandHandler())
+   *
+   */
+  public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler, this>): this;
+  public givenCommandHandler(
+    constructor: CommandHandlerConstructor,
+    aggregateRootClasses?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+  ): this;
+  public givenCommandHandler(
+    createOrConstructor: ValueOrFactory<CommandHandler, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => CommandHandler),
+    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []) {
     return this.addTask(async () => {
-      const handler = this.returnValue(createOrHandler);
-      this.commandBus.subscribe(handler);
+      if (classes.length !== 0 && typeof createOrConstructor === 'function') {
+        const handler = this.createClassByRepositoryArguments(createOrConstructor as any, classes);
+        this.commandBus.subscribe(handler);
+      } else {
+        const handler = this.returnValue(createOrConstructor);
+        this.commandBus.subscribe(handler);
+      }
+    });
+  }
+  /**
+   * Subscribe an event listener or projector to the event bus.
+   *
+   * @example
+   *
+   *    // By factory function.
+   *    givenEventListener((testBench: EventSourcingTestBench) => {
+   *      return new UserLoggedInCountProjector(testBench.getReadModelRepository(UserLogInStatistics));
+   *    })
+   *
+   *    // By constructor. This will inject the aggregate or model repositories as arguments.
+   *    givenEventListener(UserLoggedInCountProjector, [Order])
+   *    givenEventListener(UserLoggedInCountProjector, [Order, User])
+   *
+   *    // By value
+   *    givenEventListener(new UserLoggedInCountProjector())
+   *
+   */
+  public givenEventListener(createOrEventListener: ValueOrFactory<EventListener, this>): this;
+  public givenEventListener(
+    constructor: EventListenerConstructor,
+    aggregateRootClasses?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+  ): this;
+  public givenEventListener(
+    createOrEventListener: ValueOrFactory<EventListener, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => EventListener),
+    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []) {
+    return this.addTask(async () => {
+      if (classes.length !== 0 && typeof createOrEventListener === 'function') {
+        const handler = this.createClassByRepositoryArguments(createOrEventListener as any, classes);
+        this.eventBus.subscribe(handler);
+      } else {
+        const listener = this.returnValue(createOrEventListener);
+        this.eventBus.subscribe(listener);
+      }
     });
   }
 
-  public givenEventListener(createOrEventListener: EventListener | ((testBench: this) => EventListener)) {
-    return this.addTask(async () => {
-      const listener = this.returnValue(createOrEventListener);
-      this.eventBus.subscribe(listener);
-    });
-  }
-
+  /**
+   * With this you will be able to set spies on repositories, event or command bus etc.
+   *
+   * @example
+   *  let spy = jest.fn();
+   *  const testBench = await EventSourcingTestBench
+   *                      .create()
+   *                      .givenSpies(async (testBenchArg) => {
+   *                        spy = jest.spyOn(testBenchArg.eventBus, 'subscribe')
+   *                      });
+   *  expect(spy).toBeCalledWith('something');
+   *
+   * @param assignSpies
+   */
   public givenSpies(assignSpies: ((testBench: this) => void | Promise<void>)) {
     return this.addTask(async () => assignSpies(this));
   }
 
+  /**
+   * Give event that already happened in the past and append them to the corresponding aggregate event store.
+   *
+   * Keep in mind that these event will not be put on the event bus, use {@see whenEventsHappened} for this.
+   */
   public given<T extends EventSourcedAggregateRoot>(
     id: Identity,
     aggregateClass: EventSourcedAggregateRootConstructor<T>,
@@ -85,12 +172,50 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Change the current date time. This time will be used to change the recordedOn date from domain messages.
+   *
+   * @param currentTime
+   */
   public givenCurrentTime(currentTime: Date | string) {
     return this.addTask(async () => {
       this.currentTime = this.parseDateTime(currentTime);
     });
   }
 
+  /**
+   * By default all aggregates have the {@see EventSourcingRepository} class. This is only needed when you have a custom
+   * repository class.
+   *
+   * @example
+   *
+   *  // Create aggregate repository by factory function.
+   *  await EventSourcingTestBench
+   *  .create()
+   *  .givenAggregateRepository(TestAggregate, (tb) => {
+   *       return new TestRepository(
+   *         tb.getEventStore(TestAggregate),
+   *         tb.getEventBus(),
+   *         tb.getAggregateFactory(TestAggregate),
+   *         tb.getEventStreamDecorator(TestAggregate),
+   *       );
+   *   })
+   *
+   *  // By value
+   *  const testBench = new EventSourcingTestBench();
+   *  const context = testBench.getAggregateTestContext(TestAggregate);
+   *  const repository = new TestRepository(
+   *    context.getEventStore(),
+   *    testBench.eventBus,
+   *    context.getAggregateFactory(),
+   *    context.getEventStreamDecorator(),
+   *  );
+   *  await testBench.givenAggregateRepository(TestAggregate, repository);
+   *
+   *  // By default constructor signature. {@see EventSourcingRepositoryConstructor} for the arguments of this signature.
+   *  .givenAggregateRepository(TestAggregate, TestRepository)
+   *
+   */
   public givenAggregateRepository<T extends EventSourcedAggregateRoot>(
     aggregateConstructor: EventSourcedAggregateRootConstructor<T>,
     repositoryOrFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>, this> | EventSourcingRepositoryConstructor<T>) {
@@ -112,6 +237,21 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * @example
+   *
+   *   // By factory function.
+   *   EventSourcingTestBench
+   *   .create()
+   *   .givenReadModelRepository(TestReadModel, () => {
+   *      return new TestRepository();
+   *   })
+   *
+   *   // By value
+   *   EventSourcingTestBench
+   *   .create()
+   *   .givenReadModelRepository(TestReadModel, new TestRepository());
+   */
   public givenReadModelRepository<T extends ReadModel>(
     modelConstructor: ReadModelConstructor<T>,
     repositoryOrFactory: ValueOrFactory<Repository<T>, this>) {
@@ -122,12 +262,21 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Change the current date time. This time will be used to change the recordedOn date from domain messages.
+   *
+   * @param currentTime
+   */
   public whenTimeChanges(currentTime: Date | string) {
     return this.addTask(async () => {
+      await this.thenWaitUntilProcessed();
       this.currentTime = this.parseDateTime(currentTime);
     });
   }
 
+  /**
+   * Dispatch commands on the command bus.
+   */
   public whenCommands(commands: Command[]): this {
     return this.addTask(async () => {
       for (const command of commands) {
@@ -136,6 +285,23 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Dispatch domain messages on the event bus.
+   *
+   * @example
+   *
+   *     const testBench = new EventSourcingTestBench();
+   *
+   *     const id = Identity.create();
+   *
+   *     await testBench.whenDomainMessagesHappened([
+   *       new DomainMessage(id, 0, new TestEvent(), testBench.getCurrentTime()),
+   *       new DomainMessage(id, 1, new TestEvent(), testBench.getCurrentTime()),
+   *
+   *       // You can also create them with domainMessageFactory
+   *       testBench.domainMessageFactory.createDomainMessage(id, new TestEvent()),
+   *     ]);
+   */
   public whenDomainMessagesHappened(messages: DomainMessage[] | DomainEventStream): this {
     return this.addTask(async () => {
       const stream = messages instanceof Array ? SimpleDomainEventStream.of(messages) : messages;
@@ -143,6 +309,20 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Dispatch events as domain messages on the event bus.
+   *
+   * @example
+   *
+   *     const testBench = new EventSourcingTestBench();
+   *     const id = Identity.create();
+   *     testBench.whenEventsHappened(id, [
+   *        new UserRegistered(),
+   *        new UserHasLoggedIn(),
+   *        new UserHasLoggedIn(),
+   *        new UserHasLoggedIn(),
+   *     ]);
+   */
   public whenEventsHappened(id: Identity, events: DomainEvent[]): this {
     return this.addTask(async () => {
       const messages = this.domainMessageFactory.createDomainMessages(id, events);
@@ -150,6 +330,18 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Match all events that are put the event bus.
+   *
+   * @example
+   *     thenMatchEvents([
+   *       new OrderCreated(),
+   *       new OrderShipped(),
+   *
+   *       // Or match full domain message.
+   *       new DomainMessage(orderId1, 0, new OrderCreated(), EventSourcingTestBench.defaultCurrentTime)
+   *     ]);
+   */
   public thenMatchEvents(events: Array<DomainEvent | DomainMessage>): this {
     return this.addTask(async () => {
       const messages = await this.getRecordedMessages();
@@ -163,6 +355,35 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Assert read models, the actual models are retrieved by id from the corresponding repository.
+   *
+   * @example
+   *
+   *   // By value
+   *   const id = UserId.create();
+   *   const expectedModel = new UserLogInStatistics(id);
+   *   expectedModel.increaseCount();
+   *
+   *   await EventSourcingTestBench
+   *   .create()
+   *   .thenModelsShouldMatch([
+   *      expectedModel,
+   *   ]);
+   *
+   *
+   *   // By factory
+   *   await EventSourcingTestBench
+   *   .create()
+   *   .thenModelsShouldMatch(() => {
+   *      const id = UserId.create();
+   *      const expectedModel = new UserLogInStatistics(id);
+   *      expectedModel.increaseCount();
+   *      return [
+   *        expectedModel,
+   *      ];
+   *   });
+   */
   public thenModelsShouldMatch<T extends ReadModel>(modelsOrFactory: ValueOrFactory<T[], this>): this {
     return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
@@ -234,6 +455,14 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Assert a single read model by a given matcher function.
+   *
+   * @example
+   *  thenAssertModel(UserLogInStatistics, id, async (model, _testBench: EventSourcingTestBench) => {
+   *    expect(model.getCount()).toEqual(3);
+   *  });
+   */
   public thenAssertModel<T extends ReadModel>(
     modelClass: ReadModelConstructor<T>,
     id: Identity,
@@ -247,6 +476,33 @@ export class EventSourcingTestBench {
     });
   }
 
+  /**
+   * Custom assert function, can do any assertions in here.
+   *
+   * @example
+   *
+   * .thenAssert(async (testBench) => {
+   *   // Verify repository.
+   *   const orderRepository = testBench.getAggregateRepository(Order);
+   *   expect(await orderRepository.load(id)).toBeInstanceOf(Order);
+   *
+   *   // Verify event store.
+   *   const store = testBench.getEventStore(Order);
+   *   const stream = await store.load(id);
+   *   expect(await stream.toArray().toPromise()).toEqual([
+   *     new DomainMessage(id, 0, new OrderCreated(), testBench.getCurrentTime()),
+   *   ]);
+   *
+   *   // Verify all recorded messages
+   *   const messages = await testBench.getRecordedMessages();
+   *   expect(messages).toEqual([
+   *     new DomainMessage(id, 0, new OrderCreated(), testBench.getCurrentTime()),
+   *   ]);
+   *
+   *   // Verify event by test bench.
+   *   await testBench.thenMatchEvents([new OrderCreated()]);
+   * });
+   */
   public thenAssert(asserting: (testBench: this) => Promise<void> | void): this {
     return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
@@ -372,4 +628,17 @@ export class EventSourcingTestBench {
       return this;
     }).then(onfulfilled, onrejected);
   }
+
+  private createClassByRepositoryArguments(
+    constructor: CommandHandlerConstructor | EventListenerConstructor,
+    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>) {
+    const repositories = classes.map((classConstruct) => {
+      if (isEventSourcedAggregateRootConstructor(classConstruct)) {
+        return this.getAggregateTestContext(classConstruct).getRepository();
+      }
+      return this.getReadModelTestContext(classConstruct).getRepository();
+    });
+    return new (constructor as any)(...repositories);
+  }
+
 }

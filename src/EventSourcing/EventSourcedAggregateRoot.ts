@@ -11,6 +11,10 @@ export interface EventSourcedAggregateRootConstructor<T extends EventSourcedAggr
   new(id: Identity): T;
 }
 
+export function isEventSourcedAggregateRootConstructor(constructor: any): constructor is EventSourcedAggregateRootConstructor<any>{
+  return typeof constructor === 'function' && constructor.prototype instanceof EventSourcedAggregateRoot;
+}
+
 export class EventSourcedAggregateRoot extends EventSourcedEntity {
 
   private playhead = -1;
