@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Can check with snapshots: thenAggregatesShouldMatchSnapshot 1`] = `
+Object {
+  "Order": Array [
+    Order {
+      "aggregateId": OrderId {
+        "id": "5ae2e4df-f5d5-4c69-b048-30fd9c04be5b",
+      },
+      "aggregateRoot": null,
+      "playhead": 1,
+      "uncommittedEvents": Array [],
+    },
+  ],
+}
+`;
+
+exports[`Can check with snapshots: thenEventsShouldMatchSnapshot 1`] = `
+Object {
+  "Order": Array [
+    OrderCreated {},
+    OrderShipped {},
+  ],
+}
+`;
+
+exports[`Can check with snapshots: thenMessagesShouldMatchSnapshot 1`] = `
+Object {
+  "Order": Array [
+    DomainMessage {
+      "aggregateId": OrderId {
+        "id": "5ae2e4df-f5d5-4c69-b048-30fd9c04be5b",
+      },
+      "metadata": Object {},
+      "payload": OrderCreated {},
+      "playhead": 0,
+      "recordedOn": 1970-01-01T00:00:00.000Z,
+    },
+    DomainMessage {
+      "aggregateId": OrderId {
+        "id": "5ae2e4df-f5d5-4c69-b048-30fd9c04be5b",
+      },
+      "metadata": Object {},
+      "payload": OrderShipped {},
+      "playhead": 1,
+      "recordedOn": 1970-01-01T00:00:00.000Z,
+    },
+  ],
+}
+`;
+
+exports[`Can check with snapshots: thenMessagesShouldMatchSnapshot 2`] = `
+Object {
+  "aggregates": Object {
+    "Order": Array [
+      Order {
+        "aggregateId": OrderId {
+          "id": "5ae2e4df-f5d5-4c69-b048-30fd9c04be5b",
+        },
+        "aggregateRoot": null,
+        "playhead": 1,
+        "uncommittedEvents": Array [],
+      },
+    ],
+  },
+  "messages": Object {
+    "Order": Array [
+      DomainMessage {
+        "aggregateId": OrderId {
+          "id": "5ae2e4df-f5d5-4c69-b048-30fd9c04be5b",
+        },
+        "metadata": Object {},
+        "payload": OrderCreated {},
+        "playhead": 0,
+        "recordedOn": 1970-01-01T00:00:00.000Z,
+      },
+      DomainMessage {
+        "aggregateId": OrderId {
+          "id": "5ae2e4df-f5d5-4c69-b048-30fd9c04be5b",
+        },
+        "metadata": Object {},
+        "payload": OrderShipped {},
+        "playhead": 1,
+        "recordedOn": 1970-01-01T00:00:00.000Z,
+      },
+    ],
+  },
+}
+`;

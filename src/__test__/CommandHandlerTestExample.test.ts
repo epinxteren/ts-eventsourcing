@@ -164,6 +164,26 @@ it('Can also check DomainMessages', async () => {
     ]);
 });
 
+it('Can check with snapshots', async () => {
+  const id = new OrderId('5ae2e4df-f5d5-4c69-b048-30fd9c04be5b');
+  return EventSourcingTestBench
+    .create()
+    .givenCommandHandler((testBench: EventSourcingTestBench) => {
+      return new OrderCommandHandler(testBench.getAggregateRepository(Order));
+    })
+    .whenCommands([
+      new CreateOrder(id),
+      new ShipOrder(id),
+    ])
+    .thenAggregatesShouldMatchSnapshot('thenAggregatesShouldMatchSnapshot')
+    .thenEventsShouldMatchSnapshot('thenEventsShouldMatchSnapshot')
+    .thenMessagesShouldMatchSnapshot('thenMessagesShouldMatchSnapshot')
+
+    // Does everything.
+    .thenShouldMatchSnapshot('thenMessagesShouldMatchSnapshot');
+
+});
+
 it('Can have multiple instances of an aggregate', async () => {
   const id1 = OrderId.create();
   const id2 = OrderId.create();

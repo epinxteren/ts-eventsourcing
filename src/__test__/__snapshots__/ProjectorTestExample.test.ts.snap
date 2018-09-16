@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Can test a projector with snapshot 1`] = `
+Object {
+  "UserLogInStatistics": Array [
+    UserLogInStatistics {
+      "count": 3,
+      "id": UserId {
+        "id": "270df21f-1cdb-4518-bc07-432464799df6",
+      },
+    },
+  ],
+}
+`;
+
+exports[`Can test a projector with snapshot 2`] = `
+Object {
+  "models": Object {
+    "UserLogInStatistics": Array [
+      UserLogInStatistics {
+        "count": 3,
+        "id": UserId {
+          "id": "270df21f-1cdb-4518-bc07-432464799df6",
+        },
+      },
+    ],
+  },
+}
+`;

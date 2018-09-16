@@ -7,4 +7,8 @@ export class ReadModelTestContext<T extends ReadModel> {
     return this.repository;
   }
 
+  public setRepository(repository: Repository<T>) {
+    this.repository = repository;
+  }
+
 }

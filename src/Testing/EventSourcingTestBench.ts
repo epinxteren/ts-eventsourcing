@@ -40,11 +40,11 @@ export class EventSourcingTestBench {
   public readonly aggregates: AggregateTestContextCollection;
   public readonly models = new ReadModelTestContextCollection();
   public readonly eventBus: DomainEventBus;
-  private readonly asyncBus: AsynchronousDomainEventBus;
-  private readonly recordBus: RecordDomainEventBusDecorator;
-  private breakpoint: boolean = false;
-  private currentTime: Date;
-  private tasks: TestTask[] = [];
+  protected readonly asyncBus: AsynchronousDomainEventBus;
+  protected readonly recordBus: RecordDomainEventBusDecorator;
+  protected breakpoint: boolean = false;
+  protected currentTime: Date;
+  protected tasks: TestTask[] = [];
 
   constructor(currentTime: Date | string = EventSourcingTestBench.defaultCurrentTime) {
     this.currentTime = this.parseDateTime(currentTime);
@@ -112,6 +112,16 @@ export class EventSourcingTestBench {
     });
   }
 
+  public givenReadModelRepository<T extends ReadModel>(
+    modelConstructor: ReadModelConstructor<T>,
+    repositoryOrFactory: ValueOrFactory<Repository<T>, this>) {
+    return this.addTask(async () => {
+      const modelTestContext = this.getReadModelTestContext<T>(modelConstructor);
+      const repository = this.returnValue(repositoryOrFactory as any);
+      modelTestContext.setRepository(repository);
+    });
+  }
+
   public whenTimeChanges(currentTime: Date | string) {
     return this.addTask(async () => {
       this.currentTime = this.parseDateTime(currentTime);
@@ -162,6 +172,65 @@ export class EventSourcingTestBench {
         const actual = await repository.get(model.getId());
         await expect(actual).toEqual(model);
       }
+    });
+  }
+
+  public thenAggregatesShouldMatchSnapshot(snapshotName?: string): this {
+    return this.addTask(async () => {
+      await this.thenWaitUntilProcessed();
+      const aggregates = await this.aggregates.getAllAggregates();
+      expect(aggregates).toMatchSnapshot(snapshotName);
+    });
+  }
+
+  public thenMessagesShouldMatchSnapshot(snapshotName?: string): this {
+    return this.addTask(async () => {
+      await this.thenWaitUntilProcessed();
+      const messages = await this.aggregates.getAllMessages();
+      expect(messages).toMatchSnapshot(snapshotName);
+    });
+  }
+
+  public thenEventsShouldMatchSnapshot(snapshotName?: string): this {
+    return this.addTask(async () => {
+      await this.thenWaitUntilProcessed();
+      const events = await this.aggregates.getAllEvents();
+      expect(events).toMatchSnapshot(snapshotName);
+    });
+  }
+
+  public thenModelsShouldMatchSnapshot(snapshotName?: string): this {
+    return this.addTask(async () => {
+      await this.thenWaitUntilProcessed();
+      const models = await this.models.getAllModels();
+      expect(models).toMatchSnapshot(snapshotName);
+    });
+  }
+
+  /**
+   * Match all models, events and aggregates.
+   */
+  public thenShouldMatchSnapshot(snapshotName?: string): this {
+    return this.addTask(async () => {
+      await this.thenWaitUntilProcessed();
+      const data: {
+        aggregates?: {[aggregateClassName: string]: EventSourcedAggregateRoot[]},
+        messages?: {[aggregateClassName: string]: DomainMessage[]},
+        models?: {[aggregateClassName: string]: ReadModel[]},
+      } = {};
+      const aggregates = await this.aggregates.getAllAggregates();
+      if (Object.getOwnPropertyNames(aggregates).length !== 0) {
+        data.aggregates = aggregates;
+      }
+      const messages = await this.aggregates.getAllMessages();
+      if (Object.getOwnPropertyNames(messages).length !== 0) {
+        data.messages = messages;
+      }
+      const models = await this.models.getAllModels();
+      if (Object.getOwnPropertyNames(models).length !== 0) {
+        data.models = models;
+      }
+      expect(data).toMatchSnapshot(snapshotName);
     });
   }
 
@@ -278,11 +347,12 @@ export class EventSourcingTestBench {
     /* istanbul ignore next */
     if (this.breakpoint) {
       this.breakpoint = false;
+      // Step into to see what the next task is going to do.
       debugger;
     }
-    // Step into to see what the current task is doing.
     await callback.call(this);
   }
+  /* tslint:enable:no-debugger */
 
   private addPending(pending: TestTask): this & Promise<this> {
     this.tasks.push(pending);

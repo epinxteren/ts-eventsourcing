@@ -15,7 +15,7 @@ export class AggregateTestContext<T extends EventSourcedAggregateRoot> {
   private aggregateFactory: EventSourcedAggregateFactory<T> = new SimpleEventSourcedAggregateFactory<T>(
     this.aggregateConstructor,
   );
-  private eventStreamDecorator: AggregateDomainEventStreamDecorator;
+  private readonly eventStreamDecorator: AggregateDomainEventStreamDecorator;
   private repository: EventSourcingRepositoryInterface<T>;
 
   constructor(private readonly aggregateConstructor: EventSourcedAggregateRootConstructor<T>,

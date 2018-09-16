@@ -148,3 +148,23 @@ it('Can test a projector with spies', async () => {
       expect(spy).toHaveBeenCalledTimes(3);
     });
 });
+
+it('Can test a projector with snapshot', async () => {
+  const id = new UserId('270df21f-1cdb-4518-bc07-432464799df6');
+  await EventSourcingTestBench
+    .create()
+    .givenEventListener((testBench) => {
+      return new UserLoggedInCountProjector(testBench.getReadModelRepository(UserLogInStatistics));
+    })
+    .whenEventsHappened(id, [
+      new UserRegistered(),
+    ])
+    .whenEventsHappened(id, [
+      new UserHasLoggedIn(),
+      new UserHasLoggedIn(),
+      new UserHasLoggedIn(),
+    ])
+    .thenIPutABeakpoint()
+    .thenModelsShouldMatchSnapshot()
+    .thenShouldMatchSnapshot();
+});
