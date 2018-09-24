@@ -1,8 +1,8 @@
 import 'jest';
 import 'rxjs';
 import { marbles } from 'rxjs-marbles';
-import { Identity } from '../../Identity';
 import { DomainMessage, SimpleDomainEventStream } from '..';
+import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
 
 class DomainEvent {
 
@@ -11,7 +11,7 @@ class DomainEvent {
 describe('SimpleDomainEventStream', () => {
 
   it('Can iterate over it', marbles(m => {
-    const aggregateId = new Identity('1');
+    const aggregateId = new ScalarIdentity('1');
     const domainMessage1 = new DomainMessage(aggregateId, 1, new DomainEvent(), new Date());
     const domainMessage2 = new DomainMessage(aggregateId, 2, new DomainEvent(), new Date());
 
@@ -25,7 +25,7 @@ describe('SimpleDomainEventStream', () => {
   }));
 
   it('Can append streams', marbles(m => {
-    const aggregateId = new Identity('1');
+    const aggregateId = new ScalarIdentity('1');
     const domainMessage1 = new DomainMessage(aggregateId, 1, new DomainEvent(), new Date());
     const domainMessage2 = new DomainMessage(aggregateId, 2, new DomainEvent(), new Date());
     const domainMessage3 = new DomainMessage(aggregateId, 3, new DomainEvent(), new Date());
@@ -50,7 +50,7 @@ describe('SimpleDomainEventStream', () => {
   }));
 
   it('Can append hot streams', marbles(m => {
-    const aggregateId = new Identity('1');
+    const aggregateId = new ScalarIdentity('1');
     const domainMessage1 = new DomainMessage(aggregateId, 1, new DomainEvent(), new Date());
     const domainMessage2 = new DomainMessage(aggregateId, 2, new DomainEvent(), new Date());
     const domainMessage3 = new DomainMessage(aggregateId, 3, new DomainEvent(), new Date());
@@ -75,7 +75,7 @@ describe('SimpleDomainEventStream', () => {
   }));
 
   it('Can filter streams from playhead', marbles(m => {
-    const aggregateId = new Identity('1');
+    const aggregateId = new ScalarIdentity('1');
     const domainMessage1 = new DomainMessage(aggregateId, 1, new DomainEvent(), new Date());
     const domainMessage2 = new DomainMessage(aggregateId, 2, new DomainEvent(), new Date());
     const domainMessage3 = new DomainMessage(aggregateId, 3, new DomainEvent(), new Date());

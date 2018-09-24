@@ -3,16 +3,16 @@
  */
 
 import { ReadModel } from './ReadModel';
-import { Identity } from '../Identity';
+import { Identity } from '../ValueObject/Identity';
 
-export interface Repository<T extends ReadModel> {
+export interface Repository<T extends ReadModel, Id extends Identity = Identity> {
   save(model: T): Promise<void>;
 
-  has(id: Identity): Promise<boolean>;
+  has(id: Id): Promise<boolean>;
 
-  find(id: Identity): Promise<null | T>;
+  find(id: Id): Promise<null | T>;
 
-  get(id: Identity): Promise<T>;
+  get(id: Id): Promise<T>;
 
-  remove(id: Identity): Promise<void>;
+  remove(id: Id): Promise<void>;
 }

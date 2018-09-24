@@ -1,7 +1,7 @@
 /* tslint:disable:max-classes-per-file */
 
 import { allAggregateEventHandlersMetadata, AggregateHandleEvent, EventSourcedAggregateRoot } from '..';
-import { Identity } from '../../Identity';
+import { UuidIdentity } from '../../ValueObject/UuidIdentity';
 
 it('Should be able te register an event handler', () => {
   class NameHasChangedEvent {
@@ -15,7 +15,7 @@ it('Should be able te register an event handler', () => {
     }
   }
 
-  const user = new User(Identity.create());
+  const user = new User(UuidIdentity.create());
   const metdata = allAggregateEventHandlersMetadata(user);
 
   expect(metdata).toEqual([{
@@ -28,7 +28,7 @@ it('Should know when there are none', () => {
   class User extends EventSourcedAggregateRoot {
   }
 
-  const user = new User(Identity.create());
+  const user = new User(UuidIdentity.create());
   const metdata = allAggregateEventHandlersMetadata(user);
 
   expect(metdata).toEqual([]);
@@ -61,7 +61,7 @@ it('Should be able te register multiple handlers', () => {
 
   }
 
-  const user = new User(Identity.create());
+  const user = new User(UuidIdentity.create());
   const metdata = allAggregateEventHandlersMetadata(user);
 
   expect(metdata).toEqual([
@@ -89,6 +89,6 @@ it('Should have event as argument', () => {
       }
     }
 
-    return new User(Identity.create());
+    return new User(UuidIdentity.create());
   }).toThrowError();
 });

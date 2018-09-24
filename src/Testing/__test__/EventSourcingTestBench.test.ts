@@ -3,13 +3,14 @@
 import { EventSourcingTestBench } from '../EventSourcingTestBench';
 import { Command, CommandHandler, HandleCommand } from '../../CommandHandling';
 import { EventListener } from '../../EventHandling';
-import { Identity } from '../../Identity';
+import { Identity } from '../..';
 import {
   EventSourcedAggregateRoot,
   EventSourcingRepository, EventSourcingRepositoryInterface,
 } from '../../EventSourcing';
 import { DomainEvent, DomainEventStream, DomainMessage, SimpleDomainEventStream } from '../../Domain';
 import { ReadModel, Repository } from '../../ReadModel';
+import { UuidIdentity } from '../../ValueObject/UuidIdentity';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
 
@@ -218,7 +219,7 @@ describe('Given domain events should be assigned to corresponding aggregate stor
   it('Single instance', async () => {
     const testBench = new EventSourcingTestBench();
 
-    const id = Identity.create();
+    const id = UuidIdentity.create();
 
     await testBench
       .given(id, TestAggregate, [
@@ -239,8 +240,8 @@ describe('Given domain events should be assigned to corresponding aggregate stor
   it('Multiple instances', async () => {
     const testBench = new EventSourcingTestBench();
 
-    const id1 = Identity.create();
-    const id2 = Identity.create();
+    const id1 = UuidIdentity.create();
+    const id2 = UuidIdentity.create();
 
     await testBench
       .given(id1, TestAggregate, [
@@ -276,8 +277,8 @@ describe('Given domain events should be assigned to corresponding aggregate stor
 
     const testBench = new EventSourcingTestBench();
 
-    const id1 = Identity.create();
-    const id2 = Identity.create();
+    const id1 = UuidIdentity.create();
+    const id2 = UuidIdentity.create();
 
     await testBench
       .given(id1, TestAggregate, [
@@ -345,7 +346,7 @@ describe('whenDomainMessagesHappened should dispatch messages on event bus', () 
 
     const testBench = new EventSourcingTestBench();
 
-    const id = Identity.create();
+    const id = UuidIdentity.create();
 
     const mock = jest.fn();
     testBench.eventBus.publish = mock;
@@ -386,7 +387,7 @@ it('whenEventsHappened should create messages and call whenDomainMessagesHappene
   const testBench = new EventSourcingTestBench();
   testBench.domainMessageFactory.createDomainMessages = jest.fn().mockReturnValueOnce('stub stream');
   testBench.whenDomainMessagesHappened = jest.fn();
-  const id = Identity.create();
+  const id = UuidIdentity.create();
   await testBench.whenEventsHappened(id, [new TestEvent()]);
 
   expect(testBench.domainMessageFactory.createDomainMessages).toBeCalledWith(id, [new TestEvent()]);
@@ -490,7 +491,7 @@ it('Can be extended', async () => {
     .create()
     .givenTheFollowingTest();
 
-  await testBench.given(Identity.create(), TestAggregate, [])
+  await testBench.given(UuidIdentity.create(), TestAggregate, [])
                  .givenTheFollowingTest();
 
   expect(spy).toBeCalledWith('MyEventSourcingTestBench');

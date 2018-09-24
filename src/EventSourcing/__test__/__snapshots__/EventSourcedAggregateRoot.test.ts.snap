@@ -9,7 +9,7 @@ Product {
   },
   "_name": "test",
   "_stock": 12,
-  "aggregateId": Identity {
+  "aggregateId": ScalarIdentity {
     "id": "id-213",
   },
   "aggregateRoot": null,
@@ -27,14 +27,14 @@ Product {
   },
   "_name": "",
   "_stock": 0,
-  "aggregateId": Identity {
+  "aggregateId": ScalarIdentity {
     "id": "id-213",
   },
   "aggregateRoot": null,
   "playhead": 0,
   "uncommittedEvents": Array [
     DomainMessage {
-      "aggregateId": Identity {
+      "aggregateId": ScalarIdentity {
         "id": "id-213",
       },
       "metadata": Object {},

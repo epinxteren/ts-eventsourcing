@@ -16,7 +16,7 @@ import {
 import { AggregateTestContextCollection } from './Context/AggregateTestContextCollection';
 import { ReadModelTestContextCollection } from './Context/ReadModelTestContextCollection';
 import { DomainEvent, DomainMessage, SimpleDomainEventStream, DomainEventStream } from '../Domain';
-import { Identity } from '../Identity';
+import { Identity } from '../ValueObject/Identity';
 import { DomainMessageTestFactory } from './DomainMessageTestFactory';
 import { ReadModel, ReadModelConstructor, Repository } from '../ReadModel';
 import { ReadModelTestContext } from './Context/ReadModelTestContext';
@@ -85,7 +85,7 @@ export class EventSourcingTestBench {
   public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler, this>): this;
   public givenCommandHandler(
     constructor: CommandHandlerConstructor,
-    aggregateRootClasses?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+    classes?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
   ): this;
   public givenCommandHandler(
     createOrConstructor: ValueOrFactory<CommandHandler, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => CommandHandler),
@@ -121,7 +121,7 @@ export class EventSourcingTestBench {
   public givenEventListener(createOrEventListener: ValueOrFactory<EventListener, this>): this;
   public givenEventListener(
     constructor: EventListenerConstructor,
-    aggregateRootClasses?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+    classes?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
   ): this;
   public givenEventListener(
     createOrEventListener: ValueOrFactory<EventListener, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => EventListener),
@@ -292,7 +292,7 @@ export class EventSourcingTestBench {
    *
    *     const testBench = new EventSourcingTestBench();
    *
-   *     const id = Identity.create();
+   *     const id = UuidIdentity.create();
    *
    *     await testBench.whenDomainMessagesHappened([
    *       new DomainMessage(id, 0, new TestEvent(), testBench.getCurrentTime()),
@@ -315,7 +315,7 @@ export class EventSourcingTestBench {
    * @example
    *
    *     const testBench = new EventSourcingTestBench();
-   *     const id = Identity.create();
+   *     const id = UuidIdentity.create();
    *     testBench.whenEventsHappened(id, [
    *        new UserRegistered(),
    *        new UserHasLoggedIn(),

@@ -1,5 +1,5 @@
 import { DomainEvent, DomainMessage } from '../Domain';
-import { Identity } from '../Identity';
+import { Identity } from '..';
 import { EventSourcingTestBench } from './EventSourcingTestBench';
 
 /**

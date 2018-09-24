@@ -1,9 +1,9 @@
 import { DomainEventStream } from '../Domain';
-import { Identity } from '../Identity';
+import { Identity } from '../ValueObject/Identity';
 import { EventSourcedAggregateRoot } from './EventSourcedAggregateRoot';
 
-export interface EventSourcedAggregateFactory<AggregateClass extends EventSourcedAggregateRoot> {
+export interface EventSourcedAggregateFactory<AggregateClass extends EventSourcedAggregateRoot<Id>, Id extends Identity = Identity> {
 
-  create(id: Identity, events: DomainEventStream): Promise<AggregateClass>;
+  create(id: Id, events: DomainEventStream): Promise<AggregateClass>;
 
 }

@@ -1,9 +1,11 @@
 import { EventSourcedAggregateRoot } from './EventSourcedAggregateRoot';
-import { Identity } from '../Identity';
+import { Identity } from '../ValueObject/Identity';
 
-export interface EventSourcingRepositoryInterface<T extends EventSourcedAggregateRoot = EventSourcedAggregateRoot> {
+export interface EventSourcingRepositoryInterface<T extends EventSourcedAggregateRoot<Id> = EventSourcedAggregateRoot<Id>, Id extends Identity = Identity> {
 
-  load(id: Identity): Promise<T>;
+  has(id: Id): Promise<boolean>;
+
+  load(id: Id): Promise<T>;
 
   save(aggregate: T): Promise<void>;
 

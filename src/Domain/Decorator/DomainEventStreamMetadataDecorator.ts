@@ -6,7 +6,7 @@ import { SimpleDomainEventStream } from '../SimpleDomainEventStream';
 
 export class DomainEventStreamMetadataDecorator implements DomainEventStreamDecorator {
 
-  constructor(private variables: { [p: string]: any }) {
+  constructor(private readonly variables: { [p: string]: any }) {
     this.variables = variables;
   }
 

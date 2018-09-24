@@ -5,26 +5,26 @@ import {
   SimpleDomainEventStream,
   DomainEvent,
 } from '../Domain';
-import { Identity } from '../Identity';
+import { Identity } from '../ValueObject/Identity';
 
-export interface EventSourcedAggregateRootConstructor<T extends EventSourcedAggregateRoot = EventSourcedAggregateRoot> {
-  new(id: Identity): T;
+export interface EventSourcedAggregateRootConstructor<T extends EventSourcedAggregateRoot<Id> = EventSourcedAggregateRoot<Id>, Id extends Identity = Identity> {
+  new(id: Id): T;
 }
 
-export function isEventSourcedAggregateRootConstructor(constructor: any): constructor is EventSourcedAggregateRootConstructor<any>{
+export function isEventSourcedAggregateRootConstructor(constructor: any): constructor is EventSourcedAggregateRootConstructor<any> {
   return typeof constructor === 'function' && constructor.prototype instanceof EventSourcedAggregateRoot;
 }
 
-export class EventSourcedAggregateRoot extends EventSourcedEntity {
+export class EventSourcedAggregateRoot<Id extends Identity = Identity> extends EventSourcedEntity {
 
   private playhead = -1;
   private uncommittedEvents: DomainMessage[] = [];
 
-  constructor(public readonly aggregateId: Identity) {
+  constructor(public readonly aggregateId: Id) {
     super(null as any);
   }
 
-  public getAggregateRootId(): Identity {
+  public getAggregateRootId(): Id {
     return this.aggregateId;
   }
 

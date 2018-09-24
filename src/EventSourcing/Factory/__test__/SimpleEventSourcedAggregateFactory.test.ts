@@ -1,8 +1,9 @@
 import { SimpleEventSourcedAggregateFactory } from '../SimpleEventSourcedAggregateFactory';
 import { EventSourcedAggregateRoot } from '../../EventSourcedAggregateRoot';
-import { Identity } from '../../../Identity';
+import { Identity } from '../../..';
 import { DomainMessage, SimpleDomainEventStream } from '../../../Domain';
 import SpyInstance = jest.SpyInstance;
+import { ScalarIdentity } from '../../../ValueObject/ScalarIdentity';
 
 it('Can create an aggregate', async () => {
 
@@ -16,7 +17,7 @@ it('Can create an aggregate', async () => {
   }
 
   const factory = new SimpleEventSourcedAggregateFactory(Aggregate);
-  const id = new Identity('1234');
+  const id = new ScalarIdentity('1234');
 
   const stream = SimpleDomainEventStream.of([
     DomainMessage.recordNow(

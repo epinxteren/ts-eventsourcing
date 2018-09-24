@@ -1,16 +1,16 @@
 import { ReadModel } from './ReadModel';
-import { Identity } from '../Identity';
+import { Identity } from '..';
 
 /**
  * Simple read model, nothing more then a data container.
  */
-export class BlobReadModel<T> implements ReadModel {
+export class BlobReadModel<T, Id extends Identity = Identity> implements ReadModel<Id> {
 
-  constructor(private readonly id: Identity, private readonly payload: T) {
+  constructor(private readonly id: Id, private readonly payload: T) {
 
   }
 
-  public getId(): Identity {
+  public getId(): Id {
     return this.id;
   }
 

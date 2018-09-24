@@ -1,6 +1,9 @@
 import uuid from 'uuid/v4';
+import { Identity } from './Identity';
+import { default as validate } from 'uuid-validate';
+import { UuidError } from './Error/UuidError';
 
-export class Identity {
+export class UuidIdentity implements Identity {
 
   public static create() {
     return new this(uuid());
@@ -14,7 +17,9 @@ export class Identity {
   }
 
   constructor(private readonly id: string) {
-
+    if (!validate(id, 4)) {
+      throw UuidError.notValid();
+    }
   }
 
   public toString() {
@@ -22,7 +27,6 @@ export class Identity {
   }
 
   public equals(id: Identity) {
-    return this.toString() === id.toString();
+    return this.id.toString() === id.toString();
   }
-
 }

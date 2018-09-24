@@ -9,4 +9,4 @@ export * from './Testing';
 
 export * from './ClassUtil';
 export * from './ReplayService';
-export * from './Identity';
+export * from './ValueObject/Identity';

@@ -1,7 +1,7 @@
 import { EventSourcedAggregateRoot, EventSourcedEntity, AggregateHandleEvent } from '..';
 import * as MockDate from 'mockdate';
 import { DomainEvent, SimpleDomainEventStream, DomainMessage } from '../../Domain';
-import { Identity } from '../../Identity';
+import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
 
 /* tslint:disable:max-classes-per-file */
 
@@ -95,13 +95,13 @@ describe('EventSourcedAggregateRoot', () => {
   });
 
   it('Can give its aggregate id', async () => {
-    const identity = new Identity('id-213');
+    const identity = new ScalarIdentity('id-213');
     const aggregate = new EventSourcedAggregateRoot(identity);
     expect(aggregate.getAggregateRootId()).toBe(identity);
   });
 
   it('Can apply single event', async () => {
-    const identity = new Identity('id-213');
+    const identity = new ScalarIdentity('id-213');
     const aggregate = new Product(identity);
     aggregate.changeStock(10);
     expect(aggregate.stock).toBe(10);
@@ -115,7 +115,7 @@ describe('EventSourcedAggregateRoot', () => {
   });
 
   it('Can apply multiple events', async () => {
-    const identity = new Identity('id-213');
+    const identity = new ScalarIdentity('id-213');
     const aggregate = new Product(identity);
     aggregate.changeStock(10);
     aggregate.setName('test');
@@ -132,7 +132,7 @@ describe('EventSourcedAggregateRoot', () => {
   });
 
   it('Can apply original state', async () => {
-    const identity = new Identity('id-213');
+    const identity = new ScalarIdentity('id-213');
     const stream = SimpleDomainEventStream.of([
       new DomainMessage(identity, 0, new ProductStockHasChanged(10), new Date()),
       new DomainMessage(identity, 1, new NameHasChangesEvent('test'), new Date()),
@@ -144,7 +144,7 @@ describe('EventSourcedAggregateRoot', () => {
   });
 
   it('Can have children', async () => {
-    const identity = new Identity('id-213');
+    const identity = new ScalarIdentity('id-213');
     const aggregate = new Product(identity);
     aggregate.setSize(100, 200);
     expect(aggregate).toMatchSnapshot();

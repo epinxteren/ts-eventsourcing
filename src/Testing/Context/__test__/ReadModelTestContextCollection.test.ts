@@ -1,7 +1,8 @@
 import { ReadModelTestContextCollection } from '../ReadModelTestContextCollection';
 import { ReadModel } from '../../../ReadModel';
-import { Identity } from '../../../Identity';
+import { Identity } from '../../..';
 import { ReadModelTestContext } from '../ReadModelTestContext';
+import { UuidIdentity } from '../../../ValueObject/UuidIdentity';
 
 it('getByInstance should return new context', () => {
   const collection = new ReadModelTestContextCollection();
@@ -17,6 +18,6 @@ it('getByInstance should return new context', () => {
 
   }
 
-  const context = collection.getByInstance(new Model(Identity.create()));
+  const context = collection.getByInstance(new Model(UuidIdentity.create()));
   expect(context).toBeInstanceOf(ReadModelTestContext);
 });

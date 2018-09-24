@@ -7,11 +7,11 @@ import {
   Projector,
   ReadModel,
   Repository,
-  Identity,
   HandleDomainEvent,
 } from '..';
+import { UuidIdentity } from '../ValueObject/UuidIdentity';
 
-class UserId extends Identity {
+class UserId extends UuidIdentity {
 
 }
 
@@ -70,7 +70,7 @@ class UserLoggedInDurationProjector implements Projector {
   }
 
   @HandleDomainEvent
-  public async userRegistered(_event: UserRegistered, message: DomainMessage) {
+  public async userRegistered(_event: UserRegistered, message: DomainMessage<UserRegistered, UserId>) {
     const model = new UserLogInStatistics(message.aggregateId);
     await this.repository.save(model);
   }

@@ -4,17 +4,21 @@ import { AggregateDomainEventStreamDecorator, DomainEventStream, DomainEventStre
 import { EventSourcedAggregateRoot } from '../EventSourcedAggregateRoot';
 import { EventSourcedAggregateFactory } from '../EventSourcedAggregateFactory';
 import { EventSourcingRepositoryInterface } from '../EventSourcingRepositoryInterface';
-import { Identity } from '../../Identity';
+import { Identity } from '../../ValueObject/Identity';
 
-export class EventSourcingRepository<AggregateClass extends EventSourcedAggregateRoot> implements EventSourcingRepositoryInterface<AggregateClass> {
+export class EventSourcingRepository<AggregateClass extends EventSourcedAggregateRoot<Id>, Id extends Identity = Identity> implements EventSourcingRepositoryInterface<AggregateClass, Id> {
 
-  constructor(protected eventStore: EventStore,
+  constructor(protected eventStore: EventStore<Id>,
               protected eventBus: DomainEventBus,
               protected aggregateFactory: EventSourcedAggregateFactory<AggregateClass>,
               protected streamDecorator: DomainEventStreamDecorator = new AggregateDomainEventStreamDecorator([])) {
   }
 
-  public async load(id: Identity): Promise<AggregateClass> {
+  public async has(id: Id): Promise<boolean> {
+    return this.eventStore.has(id);
+  }
+
+  public async load(id: Id): Promise<AggregateClass> {
     const domainEventStream = this.eventStore.load(id);
     return this.aggregateFactory.create(id, domainEventStream);
   }

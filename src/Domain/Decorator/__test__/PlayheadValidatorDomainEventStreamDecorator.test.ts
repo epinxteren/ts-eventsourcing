@@ -2,17 +2,17 @@ import 'jest';
 import 'rxjs';
 import { marbles } from 'rxjs-marbles';
 import { PlayheadError } from '../../Error/PlayheadError';
-import { Identity } from '../../../Identity';
 import { PlayheadValidatorDomainEventStreamDecorator } from '../PlayheadValidatorDomainEventStreamDecorator';
 import { SimpleDomainEventStream } from '../../SimpleDomainEventStream';
 import { DomainMessage } from '../../DomainMessage';
+import { ScalarIdentity } from '../../../ValueObject/ScalarIdentity';
 
 class DomainEvent {
 
 }
 
 it('Accept valid playheads', marbles(m => {
-  const aggregateId = new Identity('1');
+  const aggregateId = new ScalarIdentity('1');
   const domainMessage1 = new DomainMessage(aggregateId, 1, new DomainEvent(), new Date());
   const domainMessage2 = new DomainMessage(aggregateId, 2, new DomainEvent(), new Date());
   const domainMessage3 = new DomainMessage(aggregateId, 3, new DomainEvent(), new Date());
@@ -35,7 +35,7 @@ it('Accept valid playheads', marbles(m => {
 }));
 
 it('Throws exception for invalid playheads', marbles(m => {
-  const aggregateId = new Identity('1');
+  const aggregateId = new ScalarIdentity('1');
   const domainMessage1 = new DomainMessage(aggregateId, 1, new DomainEvent(), new Date());
   const domainMessage2 = new DomainMessage(aggregateId, 2, new DomainEvent(), new Date());
   const domainMessage3 = new DomainMessage(aggregateId, 4, new DomainEvent(), new Date());

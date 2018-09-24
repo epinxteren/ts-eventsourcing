@@ -9,10 +9,10 @@ import {
   EventSourcedAggregateRoot,
   EventSourcingRepositoryInterface,
   EventSourcingTestBench,
-  Identity,
 } from '..';
+import { UuidIdentity } from '../ValueObject/UuidIdentity';
 
-class OrderId extends Identity {
+class OrderId extends UuidIdentity {
 
 }
 
@@ -207,7 +207,7 @@ it('Can have multiple instances of an aggregate', async () => {
 });
 
 it('Can test different aggregates at the same time', async () => {
-  class CustomerId extends Identity {
+  class CustomerId extends UuidIdentity {
 
   }
 
@@ -250,8 +250,8 @@ it('Can test different aggregates at the same time', async () => {
     }
   }
 
-  const orderId1 = new OrderId('order-id');
-  const customerId1 = new CustomerId('customer-id');
+  const orderId1 = OrderId.create();
+  const customerId1 = CustomerId.create();
 
   return EventSourcingTestBench
     .create()

@@ -10,7 +10,7 @@ InMemoryEventStore {
         "_isScalar": false,
         "array": Array [
           DomainMessage {
-            "aggregateId": Identity {
+            "aggregateId": ScalarIdentity {
               "id": "aggregate1 ID",
             },
             "metadata": Object {},
@@ -19,7 +19,7 @@ InMemoryEventStore {
             "recordedOn": 1970-01-18T18:26:23.762Z,
           },
           DomainMessage {
-            "aggregateId": Identity {
+            "aggregateId": ScalarIdentity {
               "id": "aggregate1 ID",
             },
             "metadata": Object {},
@@ -38,7 +38,7 @@ InMemoryEventStore {
         "_isScalar": false,
         "array": Array [
           DomainMessage {
-            "aggregateId": Identity {
+            "aggregateId": ScalarIdentity {
               "id": "aggregate2 ID",
             },
             "metadata": Object {},
@@ -47,7 +47,7 @@ InMemoryEventStore {
             "recordedOn": 1970-01-18T18:26:23.762Z,
           },
           DomainMessage {
-            "aggregateId": Identity {
+            "aggregateId": ScalarIdentity {
               "id": "aggregate2 ID",
             },
             "metadata": Object {},

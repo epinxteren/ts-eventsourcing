@@ -1,7 +1,7 @@
 import { EventSourcingRepository } from '../EventSourcingRepository';
-import { Identity } from '../../../Identity';
 import { AggregateDomainEventStreamDecorator, DomainEventStream } from '../../../Domain';
 import { EventSourcedAggregateRoot } from '../../EventSourcedAggregateRoot';
+import { ScalarIdentity } from '../../../ValueObject/ScalarIdentity';
 
 describe('EventSourcingRepository', () => {
   let context = testContext();
@@ -10,6 +10,7 @@ describe('EventSourcingRepository', () => {
     const eventStore = {
       load: jest.fn(),
       append: jest.fn(),
+      has: jest.fn(),
     };
     const domainEventBus = {
       publish: jest.fn(),
@@ -41,7 +42,7 @@ describe('EventSourcingRepository', () => {
 
   it('Can load aggregate from an event stream', async () => {
     const dummyStream: DomainEventStream = 'stub event stream' as any;
-    const identity = new Identity('test');
+    const identity = new ScalarIdentity('test');
     const aggregateRoot: EventSourcedAggregateRoot = 'stub aggregate root' as any;
     context.eventStore.load.mockReturnValue(dummyStream);
     context.aggregateFactory.create.mockReturnValue(aggregateRoot);
@@ -52,7 +53,7 @@ describe('EventSourcingRepository', () => {
   });
 
   it('Can save an aggregate', async () => {
-    const identity = new Identity('test');
+    const identity = new ScalarIdentity('test');
     const stream = ['event 1', 'event 2'];
     const aggregateRoot: EventSourcedAggregateRoot = {
       getAggregateRootId: () => identity,
@@ -63,6 +64,18 @@ describe('EventSourcingRepository', () => {
     expect(context.domainEventBus.publish).toBeCalledWith(stream);
     expect(context.eventStore.append).toBeCalledWith(identity, stream);
     expect(context.domainEventStreamDecorator.decorate).toBeCalledWith(aggregateRoot, stream);
+  });
+
+  it('Knows it has an aggregate', async () => {
+    const identity = new ScalarIdentity('test');
+    context.eventStore.has.mockReturnValue(true);
+    expect(await context.repository.has(identity)).toBeTruthy();
+  });
+
+  it('Knows it does not have an aggregate', async () => {
+    const identity = new ScalarIdentity('test');
+    context.eventStore.has.mockReturnValue(false);
+    expect(await context.repository.has(identity)).toBeFalsy();
   });
 
   it('Has a default AggregateDomainEventStreamDecorator', async () => {

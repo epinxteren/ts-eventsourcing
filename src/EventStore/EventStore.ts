@@ -1,12 +1,14 @@
 import { DomainEventStream } from '../Domain';
-import { Identity } from '../Identity';
+import { Identity } from '../ValueObject/Identity';
 
-export interface EventStore {
-  load(id: Identity): DomainEventStream;
+export interface EventStore<Id extends Identity = Identity> {
+  has(id: Id): boolean;
+
+  load(id: Id): DomainEventStream;
 
   loadAll(): DomainEventStream;
 
-  loadFromPlayhead(id: Identity, playhead: number): DomainEventStream;
+  loadFromPlayhead(id: Id, playhead: number): DomainEventStream;
 
-  append(id: Identity, eventStream: DomainEventStream): Promise<void>;
+  append(id: Id, eventStream: DomainEventStream): Promise<void>;
 }

@@ -6,7 +6,7 @@ import { ClassUtil } from '../../ClassUtil';
 import { AggregateTestContext } from './AggregateTestContext';
 import { EventSourcingTestBench } from '../EventSourcingTestBench';
 import { DomainEvent, DomainMessage } from '../../Domain';
-import { Identity } from '../../Identity';
+import { Identity } from '../..';
 
 export class AggregateTestContextCollection {
   public readonly aggregateMap: { [aggregateClassName: string]: AggregateTestContext<any> } = {};

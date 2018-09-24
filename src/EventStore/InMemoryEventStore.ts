@@ -1,14 +1,20 @@
 import { EventStore } from './EventStore';
-import { Identity } from '../Identity';
+import { Identity } from '../ValueObject/Identity';
 import { DomainEventStream, SimpleDomainEventStream } from '../Domain';
 import { EventStreamNotFoundException } from './Error/EventStreamNotFoundException';
 import { PlayheadValidatorDomainEventStreamDecorator } from '../Domain/Decorator';
 
-export class InMemoryEventStore implements EventStore {
+export class InMemoryEventStore<Id extends Identity = Identity> implements EventStore<Id> {
 
   private readonly events: { [id: string]: SimpleDomainEventStream } = {};
 
-  public load(id: Identity): DomainEventStream {
+  public has(id: Id): boolean {
+    const idString = id.toString();
+    const stream = this.events[idString];
+    return typeof stream !== 'undefined';
+  }
+
+  public load(id: Id): DomainEventStream {
     const idString = id.toString();
     const stream = this.events[idString];
     if (typeof stream !== 'undefined') {
@@ -28,12 +34,12 @@ export class InMemoryEventStore implements EventStore {
     return str;
   }
 
-  public loadFromPlayhead(id: Identity, playhead: number): DomainEventStream {
+  public loadFromPlayhead(id: Id, playhead: number): DomainEventStream {
     const stream: SimpleDomainEventStream = this.load(id) as any;
     return stream.fromPlayhead(playhead);
   }
 
-  public async append(id: Identity, eventstream: DomainEventStream): Promise<void> {
+  public async append(id: Id, eventstream: DomainEventStream): Promise<void> {
     const idString = id.toString();
     if (typeof this.events[idString] === 'undefined') {
       this.events[idString] = SimpleDomainEventStream.of([]);

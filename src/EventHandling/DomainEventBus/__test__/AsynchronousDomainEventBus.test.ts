@@ -2,7 +2,7 @@
 
 import { EventListener, AsynchronousDomainEventBus, HandleDomainEvent } from '../..';
 import { SimpleDomainEventStream, DomainMessage, DomainEvent } from '../../../Domain';
-import { Identity } from '../../../Identity';
+import { UuidIdentity } from '../../../ValueObject/UuidIdentity';
 
 it('Knows when it\'s not handling anything', async () => {
   const bus = new AsynchronousDomainEventBus();
@@ -17,7 +17,7 @@ it('Should ignore event with no handlers', async () => {
 
   const bus = new AsynchronousDomainEventBus();
   const message = new DomainMessage(
-    Identity.create(),
+    UuidIdentity.create(),
     0,
     new FoobarEvent(),
     new Date(),
@@ -48,7 +48,7 @@ it('Be able to register a single event handler', async () => {
 
   const event = new UserHasBoughtACarEvent();
   const message = new DomainMessage(
-    Identity.create(),
+    UuidIdentity.create(),
     0,
     event,
     new Date(),
@@ -89,12 +89,12 @@ it('Be able to register to multiple event (and handle with different argument in
   bus.subscribe(handler);
 
   const userLoggedInMessage = DomainMessage.recordNow(
-    Identity.create(),
+    UuidIdentity.create(),
     0,
     new UserLoggedIn(),
   );
   const userLoggedOutMessage = DomainMessage.recordNow(
-    Identity.create(),
+    UuidIdentity.create(),
     0,
     new UserLoggedOut(),
   );
@@ -132,7 +132,7 @@ it('Be able to register to multiple event handlers for the same event ', async (
   bus.subscribe(handler);
 
   const userLoggedInMessage = DomainMessage.recordNow(
-    Identity.create(),
+    UuidIdentity.create(),
     0,
     new UserLoggedIn(),
   );
@@ -171,7 +171,7 @@ it('Be able to register to multiple event (and handle with different argument in
 
   function createMessage(value: number) {
     return DomainMessage.recordNow(
-      Identity.create(),
+      UuidIdentity.create(),
       0,
       new HasAddedNumber(value),
     );

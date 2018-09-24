@@ -1,4 +1,4 @@
-import { Identity } from '../../Identity';
+import { Identity } from '../../ValueObject/Identity';
 
 export class EventStreamNotFoundException extends Error {
   public static streamNotFound(id: Identity) {
