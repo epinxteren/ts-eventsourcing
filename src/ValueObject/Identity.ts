@@ -1,3 +1,4 @@
+
 export interface Identity {
 
   toString(): string;
@@ -5,3 +6,5 @@ export interface Identity {
   equals(id: Identity): boolean;
 
 }
+
+export type IdentityConstructor<Id extends Identity> = new (...args: any[]) => Id;
