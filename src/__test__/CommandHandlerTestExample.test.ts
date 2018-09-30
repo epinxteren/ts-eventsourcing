@@ -8,9 +8,9 @@ import {
   HandleCommand,
   EventSourcedAggregateRoot,
   EventSourcingRepositoryInterface,
-  EventSourcingTestBench,
 } from '..';
 import { UuidIdentity } from '../ValueObject/UuidIdentity';
+import { EventSourcingTestBench } from '../Testing';
 
 class OrderId extends UuidIdentity {
 

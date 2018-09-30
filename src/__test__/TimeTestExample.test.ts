@@ -1,7 +1,6 @@
 /* tslint:disable:max-classes-per-file */
 
 import {
-  EventSourcingTestBench,
   DomainEvent,
   DomainMessage,
   Projector,
@@ -10,6 +9,7 @@ import {
   HandleDomainEvent,
 } from '..';
 import { UuidIdentity } from '../ValueObject/UuidIdentity';
+import { EventSourcingTestBench } from '../Testing';
 
 class UserId extends UuidIdentity {
 

@@ -5,7 +5,6 @@ export * from './EventSourcing';
 export * from './EventStore';
 export * from './Logger';
 export * from './ReadModel';
-export * from './Testing';
 
 export * from './ClassUtil';
 export * from './ReplayService';

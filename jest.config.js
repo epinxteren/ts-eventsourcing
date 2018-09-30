@@ -1,12 +1,16 @@
 module.exports = {
-    collectCoverage: true,
-    testURL: 'http://localhost',
+    collectCoverage: false,
+    testEnvironment: 'node',
     coverageDirectory: "coverage",
     collectCoverageFrom: [
         "src/**/*.{ts}",
         "!**/*test.{ts}",
         "!**/*.d.{ts}",
-        "!**/build"
+        "!**/build",
+        "!**/.stryker-tmp"
+    ],
+    modulePathIgnorePatterns: [
+        ".stryker-tmp"
     ],
     coverageThreshold: {
         "global": {
