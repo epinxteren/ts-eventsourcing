@@ -1,8 +1,9 @@
 import { DomainEventStreamDecorator } from '../DomainEventStreamDecorator';
 import { DomainEventStream } from '../DomainEventStream';
-import { EventSourcedAggregateRoot } from '../../EventSourcing';
 import { SimpleDomainEventStream } from '../SimpleDomainEventStream';
 import { PlayheadError } from '../Error/PlayheadError';
+import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
+import 'rxjs/add/operator/do';
 
 export class PlayheadValidatorDomainEventStreamDecorator implements DomainEventStreamDecorator {
 

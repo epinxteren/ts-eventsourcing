@@ -1,5 +1,5 @@
 import { EventSourcedAggregateRoot } from './EventSourcedAggregateRoot';
-import { DomainEvent } from '../Domain';
+import { DomainEvent } from '../Domain/DomainEvent';
 
 export class EventSourcedEntity<T extends EventSourcedAggregateRoot = EventSourcedAggregateRoot> {
 

@@ -1,4 +1,4 @@
-import { ConsoleLogger } from '..';
+import { ConsoleLogger } from '../ConsoleLogger';
 
 it('should pass log message to console logger', () => {
 

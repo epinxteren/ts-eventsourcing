@@ -1,12 +1,15 @@
-import {
-  EventSourcedAggregateRoot,
-  EventSourcedAggregateRootConstructor,
-} from '../../EventSourcing';
+
 import { ClassUtil } from '../../ClassUtil';
 import { AggregateTestContext } from './AggregateTestContext';
 import { EventSourcingTestBench } from '../EventSourcingTestBench';
-import { DomainEvent, DomainMessage } from '../../Domain';
-import { Identity } from '../..';
+import { DomainEvent } from '../../Domain/DomainEvent';
+import {
+  EventSourcedAggregateRoot,
+  EventSourcedAggregateRootConstructor,
+} from '../../EventSourcing/EventSourcedAggregateRoot';
+import { Identity } from '../../ValueObject/Identity';
+import { DomainMessage } from '../../Domain/DomainMessage';
+import 'rxjs/add/operator/toArray';
 
 export class AggregateTestContextCollection {
   public readonly aggregateMap: { [aggregateClassName: string]: AggregateTestContext<any> } = {};

@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 import { EventListener, EventListenerConstructor } from './EventListener';
 import { IncorrectDomainEventHandlerError } from './Error/IncorrectDomainEventHandlerError';
-import { DomainEventConstructor, DomainMessage } from '../Domain';
 import { ClassUtil } from '../ClassUtil';
 import { Metadata } from '../Metadata';
+import { DomainEventConstructor } from '../Domain/DomainEvent';
+import { DomainMessage } from '../Domain/DomainMessage';
 
 const EVENT_HANDLERS = Symbol.for('event_handlers');
 

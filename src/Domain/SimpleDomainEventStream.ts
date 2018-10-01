@@ -1,5 +1,8 @@
 import { DomainEventStream } from './DomainEventStream';
-import { Observable } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/concat';
+import 'rxjs/add/operator/filter';
 import { DomainMessage } from './DomainMessage';
 
 export class SimpleDomainEventStream extends Observable<DomainMessage> implements DomainEventStream {

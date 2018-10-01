@@ -1,10 +1,12 @@
-import { EventStore } from '../../EventStore';
-import { DomainEventBus } from '../../EventHandling';
-import { AggregateDomainEventStreamDecorator, DomainEventStream, DomainEventStreamDecorator } from '../../Domain';
 import { EventSourcedAggregateRoot } from '../EventSourcedAggregateRoot';
 import { EventSourcedAggregateFactory } from '../EventSourcedAggregateFactory';
 import { EventSourcingRepositoryInterface } from '../EventSourcingRepositoryInterface';
 import { Identity } from '../../ValueObject/Identity';
+import { EventStore } from '../../EventStore/EventStore';
+import { DomainEventBus } from '../../EventHandling/DomainEventBus';
+import { DomainEventStream } from '../../Domain/DomainEventStream';
+import { DomainEventStreamDecorator } from '../../Domain/DomainEventStreamDecorator';
+import { AggregateDomainEventStreamDecorator } from '../../Domain/Decorator/AggregateDomainEventStreamDecorator';
 
 export class EventSourcingRepository<AggregateClass extends EventSourcedAggregateRoot<Id>, Id extends Identity = Identity> implements EventSourcingRepositoryInterface<AggregateClass, Id> {
 

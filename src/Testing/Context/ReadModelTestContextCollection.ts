@@ -1,7 +1,8 @@
 import { ClassUtil } from '../../ClassUtil';
 import { ReadModelTestContext } from './ReadModelTestContext';
-import { ReadModel, ReadModelConstructor, Repository } from '../../ReadModel';
 import { TestError } from '../Error/TestError';
+import { ReadModel, ReadModelConstructor } from '../../ReadModel/ReadModel';
+import { Repository } from '../../ReadModel/Repository';
 
 export class ReadModelTestContextCollection {
   public readonly map: { [className: string]: ReadModelTestContext<any> } = {};

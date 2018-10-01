@@ -1,6 +1,7 @@
-import { DomainEvent, DomainMessage } from '../Domain';
-import { Identity } from '..';
 import { EventSourcingTestBench } from './EventSourcingTestBench';
+import { DomainEvent } from '../Domain/DomainEvent';
+import { Identity } from '../ValueObject/Identity';
+import { DomainMessage } from '../Domain/DomainMessage';
 
 /**
  * Rembers playhead for given ids.

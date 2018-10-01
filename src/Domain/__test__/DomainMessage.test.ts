@@ -1,5 +1,5 @@
-import { DomainMessage } from '..';
 import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
+import { DomainMessage } from '../DomainMessage';
 
 it('Can print a domain message', () => {
   class DomainEvent {

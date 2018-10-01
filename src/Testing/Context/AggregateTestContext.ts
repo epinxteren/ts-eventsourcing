@@ -1,14 +1,16 @@
-import {
-  EventSourcedAggregateFactory,
-  EventSourcedAggregateRoot, EventSourcedAggregateRootConstructor,
-  EventSourcingRepository,
-  EventSourcingRepositoryInterface,
-  SimpleEventSourcedAggregateFactory,
-} from '../../EventSourcing';
-import { EventStore, InMemoryEventStore } from '../../EventStore';
 import { EventSourcingTestBench } from '../EventSourcingTestBench';
 import { OverrideDateDomainEventStreamDecorator } from '../../Domain/Decorator/OverrideDateDomainEventStreamDecorator';
-import { AggregateDomainEventStreamDecorator } from '../../Domain';
+import { EventStore } from '../../EventStore/EventStore';
+import { InMemoryEventStore } from '../../EventStore/InMemoryEventStore';
+import { SimpleEventSourcedAggregateFactory } from '../../EventSourcing/Factory/SimpleEventSourcedAggregateFactory';
+import { EventSourcingRepositoryInterface } from '../../EventSourcing/EventSourcingRepositoryInterface';
+import { EventSourcedAggregateFactory } from '../../EventSourcing/EventSourcedAggregateFactory';
+import {
+  EventSourcedAggregateRoot,
+  EventSourcedAggregateRootConstructor,
+} from '../../EventSourcing/EventSourcedAggregateRoot';
+import { EventSourcingRepository } from '../../EventSourcing/Repository/EventSourcingRepository';
+import { AggregateDomainEventStreamDecorator } from '../../Domain/Decorator/AggregateDomainEventStreamDecorator';
 
 export class AggregateTestContext<T extends EventSourcedAggregateRoot> {
   private eventStore: EventStore = new InMemoryEventStore();

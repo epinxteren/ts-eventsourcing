@@ -1,8 +1,8 @@
 import { ReadModelTestContextCollection } from '../ReadModelTestContextCollection';
-import { ReadModel } from '../../../ReadModel';
-import { Identity } from '../../..';
 import { ReadModelTestContext } from '../ReadModelTestContext';
 import { UuidIdentity } from '../../../ValueObject/UuidIdentity';
+import { ReadModel } from '../../../ReadModel/ReadModel';
+import { Identity } from '../../../ValueObject/Identity';
 
 it('getByInstance should return new context', () => {
   const collection = new ReadModelTestContextCollection();

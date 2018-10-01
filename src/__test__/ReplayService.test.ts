@@ -1,6 +1,9 @@
 import { ReplayService } from '../ReplayService';
-import { DomainEventStream, SimpleDomainEventStream } from '../Domain';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/throw';
+
+import { DomainEventStream } from '../Domain/DomainEventStream';
+import { SimpleDomainEventStream } from '../Domain/SimpleDomainEventStream';
 
 it('Can replay streams', async () => {
   const eventStoreMock = {

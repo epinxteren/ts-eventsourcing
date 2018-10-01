@@ -1,7 +1,10 @@
 /* tslint:disable:max-classes-per-file */
 
-import { HandleDomainEvent, allHandleDomainEventMetadata, IncorrectDomainEventHandlerError, EventListener } from '..';
-import { DomainEvent, DomainMessage } from '../../Domain';
+import { allHandleDomainEventMetadata, HandleDomainEvent } from '../HandleDomainEvent';
+import { DomainEvent } from '../../Domain/DomainEvent';
+import { IncorrectDomainEventHandlerError } from '../Error/IncorrectDomainEventHandlerError';
+import { DomainMessage } from '../../Domain/DomainMessage';
+import { EventListener } from '../EventListener';
 
 class UserHasBoughtACarEvent implements DomainEvent {
 

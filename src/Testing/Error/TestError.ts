@@ -1,5 +1,5 @@
 import { ClassUtil } from '../../ClassUtil';
-import { Repository } from '../../ReadModel';
+import { Repository } from '../../ReadModel/Repository';
 
 export class TestError extends Error {
 

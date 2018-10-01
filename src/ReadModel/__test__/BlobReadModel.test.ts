@@ -1,5 +1,5 @@
-import { BlobReadModel } from '..';
 import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
+import { BlobReadModel } from '../BlobReadModel';
 
 it('Can create readmodel', () => {
   const id = new ScalarIdentity('1');

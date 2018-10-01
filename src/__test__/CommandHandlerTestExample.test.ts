@@ -1,16 +1,14 @@
 /* tslint:disable:max-classes-per-file */
 
-import {
-  DomainEvent,
-  DomainMessage,
-  Command,
-  CommandHandler,
-  HandleCommand,
-  EventSourcedAggregateRoot,
-  EventSourcingRepositoryInterface,
-} from '..';
 import { UuidIdentity } from '../ValueObject/UuidIdentity';
 import { EventSourcingTestBench } from '../Testing';
+import { DomainEvent } from '../Domain/DomainEvent';
+import { Command } from '../CommandHandling/Command';
+import { EventSourcedAggregateRoot } from '../EventSourcing/EventSourcedAggregateRoot';
+import { CommandHandler } from '../CommandHandling/CommandHandler';
+import { EventSourcingRepositoryInterface } from '../EventSourcing/EventSourcingRepositoryInterface';
+import { HandleCommand } from '../CommandHandling/HandleCommand';
+import { DomainMessage } from '../Domain/DomainMessage';
 
 class OrderId extends UuidIdentity {
 

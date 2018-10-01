@@ -1,11 +1,9 @@
 import { EventSourcedEntity } from './EventSourcedEntity';
-import {
-  DomainMessage,
-  DomainEventStream,
-  SimpleDomainEventStream,
-  DomainEvent,
-} from '../Domain';
 import { Identity } from '../ValueObject/Identity';
+import { DomainEventStream } from '../Domain/DomainEventStream';
+import { DomainEvent } from '../Domain/DomainEvent';
+import { SimpleDomainEventStream } from '../Domain/SimpleDomainEventStream';
+import { DomainMessage } from '../Domain/DomainMessage';
 
 export interface EventSourcedAggregateRootConstructor<T extends EventSourcedAggregateRoot<Id> = EventSourcedAggregateRoot<Id>, Id extends Identity = Identity> {
   new(id: Id): T;

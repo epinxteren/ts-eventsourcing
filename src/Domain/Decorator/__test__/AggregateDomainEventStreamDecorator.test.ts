@@ -1,7 +1,7 @@
-import { AggregateDomainEventStreamDecorator } from '..';
-import { EventSourcedAggregateRoot } from '../../../EventSourcing';
 import { SimpleDomainEventStream } from '../../SimpleDomainEventStream';
 import { DomainEventStreamDecorator } from '../../DomainEventStreamDecorator';
+import { EventSourcedAggregateRoot } from '../../../EventSourcing/EventSourcedAggregateRoot';
+import { AggregateDomainEventStreamDecorator } from '../AggregateDomainEventStreamDecorator';
 
 it('Can have no decorators', () => {
   const aggregate: EventSourcedAggregateRoot = jest.fn() as any;

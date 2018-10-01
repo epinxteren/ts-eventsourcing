@@ -1,5 +1,4 @@
 import 'jest';
-import 'rxjs';
 import { marbles } from 'rxjs-marbles';
 import { PlayheadError } from '../../Error/PlayheadError';
 import { PlayheadValidatorDomainEventStreamDecorator } from '../PlayheadValidatorDomainEventStreamDecorator';

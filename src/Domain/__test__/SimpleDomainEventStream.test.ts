@@ -1,8 +1,7 @@
-import 'jest';
-import 'rxjs';
 import { marbles } from 'rxjs-marbles';
-import { DomainMessage, SimpleDomainEventStream } from '..';
 import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
+import { SimpleDomainEventStream } from '../SimpleDomainEventStream';
+import { DomainMessage } from '../DomainMessage';
 
 class DomainEvent {
 

@@ -1,16 +1,21 @@
 /* tslint:disable:max-classes-per-file */
 
 import { EventSourcingTestBench } from '../EventSourcingTestBench';
-import { Command, CommandHandler, HandleCommand } from '../../CommandHandling';
-import { EventListener } from '../../EventHandling';
-import { Identity } from '../..';
-import {
-  EventSourcedAggregateRoot,
-  EventSourcingRepository, EventSourcingRepositoryInterface,
-} from '../../EventSourcing';
-import { DomainEvent, DomainEventStream, DomainMessage, SimpleDomainEventStream } from '../../Domain';
-import { ReadModel, Repository } from '../../ReadModel';
 import { UuidIdentity } from '../../ValueObject/UuidIdentity';
+import { DomainEvent } from '../../Domain/DomainEvent';
+import { DomainEventStream } from '../../Domain/DomainEventStream';
+import { ReadModel } from '../../ReadModel/ReadModel';
+import { EventSourcingRepositoryInterface } from '../../EventSourcing/EventSourcingRepositoryInterface';
+import { CommandHandler } from '../../CommandHandling/CommandHandler';
+import { HandleCommand } from '../../CommandHandling/HandleCommand';
+import { Repository } from '../../ReadModel/Repository';
+import { Command } from '../../CommandHandling/Command';
+import { SimpleDomainEventStream } from '../../Domain/SimpleDomainEventStream';
+import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
+import { Identity } from '../../ValueObject/Identity';
+import { DomainMessage } from '../../Domain/DomainMessage';
+import { EventSourcingRepository } from '../../EventSourcing/Repository/EventSourcingRepository';
+import { EventListener } from '../../EventHandling/EventListener';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
 

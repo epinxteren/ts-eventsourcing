@@ -1,7 +1,8 @@
 import { EventSourcingRepository } from '../EventSourcingRepository';
-import { AggregateDomainEventStreamDecorator, DomainEventStream } from '../../../Domain';
 import { EventSourcedAggregateRoot } from '../../EventSourcedAggregateRoot';
 import { ScalarIdentity } from '../../../ValueObject/ScalarIdentity';
+import { DomainEventStream } from '../../../Domain/DomainEventStream';
+import { AggregateDomainEventStreamDecorator } from '../../../Domain/Decorator/AggregateDomainEventStreamDecorator';
 
 describe('EventSourcingRepository', () => {
   let context = testContext();

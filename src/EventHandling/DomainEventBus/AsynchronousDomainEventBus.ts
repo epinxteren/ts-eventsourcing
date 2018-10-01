@@ -3,10 +3,20 @@
  */
 import { DomainEventBus } from '../DomainEventBus';
 import { EventListener } from '../EventListener';
-import { DomainEventStream, DomainMessage } from '../../Domain';
 import { allHandleDomainEventMetadata, DomainEventHandlerMetadata } from '../HandleDomainEvent';
 import { ClassUtil } from '../../ClassUtil';
-import { Subject, Observable, Subscription } from 'rxjs';
+import { DomainEventStream } from '../../Domain/DomainEventStream';
+import { DomainMessage } from '../../Domain/DomainMessage';
+import { Subscription } from 'rxjs/Subscription';
+import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/concat';
+import 'rxjs/add/operator/first';
+import 'rxjs/add/operator/toArray';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/concatMap';
+import 'rxjs/add/observable/fromPromise';
+import 'rxjs/add/observable/empty';
 
 /**
  * Always passes all events in sequence to the event corresponding handlers.

@@ -1,7 +1,8 @@
 import 'jest';
-import { InMemoryRepository, ReadModel } from '..';
-import { Identity } from '../..';
 import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
+import { InMemoryRepository } from '../InMemoryRepository';
+import { ReadModel } from '../ReadModel';
+import { Identity } from '../../ValueObject/Identity';
 
 class TestReadModel implements ReadModel {
 

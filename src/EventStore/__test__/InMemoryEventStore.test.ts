@@ -1,8 +1,10 @@
 import 'jest';
-import { EventStreamNotFoundException, InMemoryEventStore } from '..';
-import { DomainMessage, SimpleDomainEventStream } from '../../Domain';
 import { PlayheadError } from '../../Domain/Error/PlayheadError';
 import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
+import { InMemoryEventStore } from '../InMemoryEventStore';
+import { EventStreamNotFoundException } from '../Error/EventStreamNotFoundException';
+import { SimpleDomainEventStream } from '../../Domain/SimpleDomainEventStream';
+import { DomainMessage } from '../../Domain/DomainMessage';
 
 class DomainEvent {
 

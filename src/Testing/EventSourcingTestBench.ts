@@ -1,26 +1,26 @@
-import { SimpleCommandBus, CommandBus, CommandHandler, Command, CommandHandlerConstructor } from '../CommandHandling';
-import {
-  EventSourcedAggregateRoot,
-  EventSourcedAggregateRootConstructor,
-  EventSourcingRepositoryInterface,
-  EventSourcingRepositoryConstructor,
-  isEventSourcingRepositoryConstructor,
-  isEventSourcedAggregateRootConstructor,
-} from '../EventSourcing';
-import {
-  AsynchronousDomainEventBus,
-  DomainEventBus,
-  EventListener, EventListenerConstructor,
-  RecordDomainEventBusDecorator,
-} from '../EventHandling';
 import { AggregateTestContextCollection } from './Context/AggregateTestContextCollection';
 import { ReadModelTestContextCollection } from './Context/ReadModelTestContextCollection';
-import { DomainEvent, DomainMessage, SimpleDomainEventStream, DomainEventStream } from '../Domain';
 import { Identity } from '../ValueObject/Identity';
 import { DomainMessageTestFactory } from './DomainMessageTestFactory';
-import { ReadModel, ReadModelConstructor, Repository } from '../ReadModel';
 import { ReadModelTestContext } from './Context/ReadModelTestContext';
 import moment from 'moment';
+import { SimpleCommandBus } from '../CommandHandling/SimpleCommandBus';
+import { CommandBus } from '../CommandHandling/CommandBus';
+import { DomainEventBus } from '../EventHandling/DomainEventBus';
+import { AsynchronousDomainEventBus } from '../EventHandling/DomainEventBus/AsynchronousDomainEventBus';
+import { RecordDomainEventBusDecorator } from '../EventHandling/DomainEventBus/RecordDomainEventBusDecorator';
+import { CommandHandler, CommandHandlerConstructor } from '../CommandHandling/CommandHandler';
+import { EventSourcedAggregateRoot, EventSourcedAggregateRootConstructor, isEventSourcedAggregateRootConstructor } from '../EventSourcing/EventSourcedAggregateRoot';
+import { ReadModel, ReadModelConstructor } from '../ReadModel/ReadModel';
+import { EventSourcingRepositoryInterface } from '../EventSourcing/EventSourcingRepositoryInterface';
+import { EventListenerConstructor, EventListener } from '../EventHandling/EventListener';
+import { DomainEvent } from '../Domain/DomainEvent';
+import { SimpleDomainEventStream } from '../Domain/SimpleDomainEventStream';
+import { EventSourcingRepositoryConstructor, isEventSourcingRepositoryConstructor } from '../EventSourcing/Repository/EventSourcingRepository';
+import { Repository } from '../ReadModel/Repository';
+import { Command } from '../CommandHandling/Command';
+import { DomainMessage } from '../Domain/DomainMessage';
+import { DomainEventStream } from '../Domain/DomainEventStream';
 
 export interface TestTask {
   callback: () => Promise<any>;
@@ -120,18 +120,18 @@ export class EventSourcingTestBench {
    */
   public givenEventListener(createOrEventListener: ValueOrFactory<EventListener, this>): this;
   public givenEventListener(
-    constructor: EventListenerConstructor,
-    classes?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+    constructor: (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => EventListener) | EventListenerConstructor,
+    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
   ): this;
   public givenEventListener(
-    createOrEventListener: ValueOrFactory<EventListener, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => EventListener),
-    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []) {
+    createOrEventListener: ValueOrFactory<EventListener, this> | EventListenerConstructor,
+    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []): this {
     return this.addTask(async () => {
       if (classes.length !== 0 && typeof createOrEventListener === 'function') {
         const handler = this.createClassByRepositoryArguments(createOrEventListener as any, classes);
         this.eventBus.subscribe(handler);
       } else {
-        const listener = this.returnValue(createOrEventListener);
+        const listener = this.returnValue(createOrEventListener as any);
         this.eventBus.subscribe(listener);
       }
     });

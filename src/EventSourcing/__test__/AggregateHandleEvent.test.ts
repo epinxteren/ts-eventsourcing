@@ -1,7 +1,8 @@
 /* tslint:disable:max-classes-per-file */
 
-import { allAggregateEventHandlersMetadata, AggregateHandleEvent, EventSourcedAggregateRoot } from '..';
 import { UuidIdentity } from '../../ValueObject/UuidIdentity';
+import { AggregateHandleEvent, allAggregateEventHandlersMetadata } from '../AggregateHandleEvent';
+import { EventSourcedAggregateRoot } from '../EventSourcedAggregateRoot';
 
 it('Should be able te register an event handler', () => {
   class NameHasChangedEvent {

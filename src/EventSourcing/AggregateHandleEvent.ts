@@ -1,9 +1,9 @@
 import 'reflect-metadata';
-import { DomainEventConstructor } from '../Domain';
 import { EventSourcedEntity } from './EventSourcedEntity';
 import { IncorrectEventHandlerError } from './Error/IncorrectEventHandlerError';
-import { EventListenerConstructor } from '../EventHandling';
 import { Metadata } from '../Metadata';
+import { DomainEventConstructor } from '../Domain/DomainEvent';
+import { EventListenerConstructor } from '../EventHandling/EventListener';
 
 const AGGREGATE_EVENT_HANDLER = Symbol.for('aggregate_handler');
 

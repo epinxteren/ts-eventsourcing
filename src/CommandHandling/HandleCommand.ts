@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { CommandConstructor } from './Command';
 import { CommandHandler, CommandHandlerConstructor } from './CommandHandler';
-import { IncorrectCommandHandlerError } from './Error';
 import { Metadata } from '../Metadata';
+import { IncorrectCommandHandlerError } from './Error/IncorrectCommandHandlerError';
 
 const COMMAND_HANDLERS = Symbol.for('command_handlers');
 

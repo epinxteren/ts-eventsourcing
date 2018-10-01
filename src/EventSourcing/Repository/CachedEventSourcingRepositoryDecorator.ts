@@ -1,6 +1,6 @@
 import { EventSourcedAggregateRoot } from '../EventSourcedAggregateRoot';
 import { EventSourcingRepositoryInterface } from '../EventSourcingRepositoryInterface';
-import { Identity } from '../..';
+import { Identity } from '../../ValueObject/Identity';
 
 /**
  * Loading happens from memory.

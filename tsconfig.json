@@ -3,6 +3,9 @@
     "module": "commonjs",
     "removeComments": false,
     "noLib": false,
+    "lib": [
+      "es2015"
+    ],
     "target": "es2017",
     "outDir": "./build",
     "importHelpers": true,
@@ -10,7 +13,9 @@
 
     /* Basic Options */
     "skipLibCheck": true,                     /* Skip type checking of declaration files.  */
-    "sourceMap": true,                        /* Generates corresponding '.map' file. */
+    "sourceMap": false,                        /* Generates corresponding '.map' file. */
+    "inlineSources": true,
+    "inlineSourceMap": true,
     "declaration": true,                      /* Generates corresponding '.d.ts' file. */
 
     /* Strict Type-Checking Options */

@@ -1,8 +1,10 @@
 import { EventStore } from './EventStore';
 import { Identity } from '../ValueObject/Identity';
-import { DomainEventStream, SimpleDomainEventStream } from '../Domain';
 import { EventStreamNotFoundException } from './Error/EventStreamNotFoundException';
-import { PlayheadValidatorDomainEventStreamDecorator } from '../Domain/Decorator';
+import { DomainEventStream } from '../Domain/DomainEventStream';
+import { SimpleDomainEventStream } from '../Domain/SimpleDomainEventStream';
+import { PlayheadValidatorDomainEventStreamDecorator } from '../Domain/Decorator/PlayheadValidatorDomainEventStreamDecorator';
+import 'rxjs/add/operator/toArray';
 
 export class InMemoryEventStore<Id extends Identity = Identity> implements EventStore<Id> {
 

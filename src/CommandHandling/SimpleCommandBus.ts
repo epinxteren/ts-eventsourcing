@@ -1,9 +1,10 @@
 import { CommandHandler } from './CommandHandler';
 import { CommandBus } from './CommandBus';
 import { getHandleCommandMetadata } from './HandleCommand';
-import { CommandHandlerAlreadyRegisteredError, CommandHandlerNotRegisteredError } from './Error';
 import { ClassUtil } from '../ClassUtil';
 import { Command } from './Command';
+import { CommandHandlerNotRegisteredError } from './Error/CommandHandlerNotRegisteredError';
+import { CommandHandlerAlreadyRegisteredError } from './Error/CommandHandlerAlreadyRegisteredError';
 
 /**
  * Only support only one handler for each command.

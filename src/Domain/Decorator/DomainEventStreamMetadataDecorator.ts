@@ -1,8 +1,9 @@
 import { DomainEventStreamDecorator } from '../DomainEventStreamDecorator';
 import { DomainMessage } from '../DomainMessage';
-import { EventSourcedAggregateRoot } from '../../EventSourcing';
 import { DomainEventStream } from '../DomainEventStream';
 import { SimpleDomainEventStream } from '../SimpleDomainEventStream';
+import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
+import 'rxjs/add/operator/map';
 
 export class DomainEventStreamMetadataDecorator implements DomainEventStreamDecorator {
 

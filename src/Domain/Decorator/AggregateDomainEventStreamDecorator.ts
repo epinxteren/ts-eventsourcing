@@ -1,5 +1,6 @@
-import { EventSourcedAggregateRoot } from '../../EventSourcing';
-import { DomainEventStreamDecorator, DomainEventStream } from '..';
+import { DomainEventStream } from '../DomainEventStream';
+import { DomainEventStreamDecorator } from '../DomainEventStreamDecorator';
+import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
 
 export class AggregateDomainEventStreamDecorator implements DomainEventStreamDecorator {
 

@@ -1,5 +1,5 @@
-import { DomainEventStream } from '../Domain';
 import { EventListener } from './EventListener';
+import { DomainEventStream } from '../Domain/DomainEventStream';
 
 /**
  * Publishes events to the subscribed event listeners.

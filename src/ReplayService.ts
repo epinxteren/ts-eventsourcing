@@ -1,7 +1,8 @@
-import { EventStore } from './EventStore';
-import { DomainEventBus } from './EventHandling';
 import { Subject } from 'rxjs/Subject';
-import { SimpleDomainEventStream, DomainMessage } from './Domain';
+import { EventStore } from './EventStore/EventStore';
+import { DomainEventBus } from './EventHandling/DomainEventBus';
+import { SimpleDomainEventStream } from './Domain/SimpleDomainEventStream';
+import { DomainMessage } from './Domain/DomainMessage';
 
 export class ReplayService {
 

@@ -1,6 +1,7 @@
-import { DomainEventStreamMetadataDecorator } from '..';
 import { SimpleDomainEventStream } from '../../SimpleDomainEventStream';
 import { DomainMessage } from '../../DomainMessage';
+import { DomainEventStreamMetadataDecorator } from '../DomainEventStreamMetadataDecorator';
+import 'rxjs/add/operator/toArray';
 
 it('Does nothing by default', async () => {
   const decorator = new DomainEventStreamMetadataDecorator({});

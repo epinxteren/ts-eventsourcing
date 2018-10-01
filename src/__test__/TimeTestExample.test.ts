@@ -1,15 +1,13 @@
 /* tslint:disable:max-classes-per-file */
 
-import {
-  DomainEvent,
-  DomainMessage,
-  Projector,
-  ReadModel,
-  Repository,
-  HandleDomainEvent,
-} from '..';
 import { UuidIdentity } from '../ValueObject/UuidIdentity';
 import { EventSourcingTestBench } from '../Testing';
+import { HandleDomainEvent } from '../EventHandling/HandleDomainEvent';
+import { DomainMessage } from '../Domain/DomainMessage';
+import { Projector } from '../ReadModel/Projector';
+import { Repository } from '../ReadModel/Repository';
+import { DomainEvent } from '../Domain/DomainEvent';
+import { ReadModel } from '../ReadModel/ReadModel';
 
 class UserId extends UuidIdentity {
 

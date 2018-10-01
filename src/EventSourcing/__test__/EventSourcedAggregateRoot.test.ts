@@ -1,7 +1,12 @@
-import { EventSourcedAggregateRoot, EventSourcedEntity, AggregateHandleEvent } from '..';
 import * as MockDate from 'mockdate';
-import { DomainEvent, SimpleDomainEventStream, DomainMessage } from '../../Domain';
 import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
+import { DomainEvent } from '../../Domain/DomainEvent';
+import { SimpleDomainEventStream } from '../../Domain/SimpleDomainEventStream';
+import { AggregateHandleEvent } from '../AggregateHandleEvent';
+import { EventSourcedAggregateRoot } from '../EventSourcedAggregateRoot';
+import { DomainMessage } from '../../Domain/DomainMessage';
+import { EventSourcedEntity } from '../EventSourcedEntity';
+import 'rxjs/add/operator/toArray';
 
 /* tslint:disable:max-classes-per-file */
 

@@ -3,7 +3,8 @@
  */
 import { DomainEventBus } from '../DomainEventBus';
 import { EventListener } from '../EventListener';
-import { DomainEventStream, DomainMessage } from '../../Domain';
+import { DomainMessage } from '../../Domain/DomainMessage';
+import { DomainEventStream } from '../../Domain/DomainEventStream';
 
 /**
  * For recording messages that are put on the bus.

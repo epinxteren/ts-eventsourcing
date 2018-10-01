@@ -1,6 +1,6 @@
 import { DomainEvent } from './DomainEvent';
-import { Identity } from '..';
 import { ClassUtil } from '../ClassUtil';
+import { Identity } from '../ValueObject/Identity';
 
 export class DomainMessage<DM extends DomainEvent = DomainEvent, Id extends Identity = Identity> {
 

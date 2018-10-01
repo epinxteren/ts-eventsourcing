@@ -1,4 +1,4 @@
-import { NullLogger } from '..';
+import { NullLogger } from '../NullLogger';
 
 it('Should do nothing', () => {
   const logger = new NullLogger();

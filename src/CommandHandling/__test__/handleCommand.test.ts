@@ -1,12 +1,9 @@
 /* tslint:disable:max-classes-per-file */
 
-import {
-  CommandHandler,
-  getHandleCommandMetadata,
-  HandleCommand,
-  IncorrectCommandHandlerError,
-  Command,
-} from '../';
+import { Command } from '../Command';
+import { getHandleCommandMetadata, HandleCommand } from '../HandleCommand';
+import { IncorrectCommandHandlerError } from '../Error/IncorrectCommandHandlerError';
+import { CommandHandler } from '../CommandHandler';
 
 it('Can register a command handler', () => {
   class TestCommand implements Command {

@@ -1,8 +1,12 @@
 /* tslint:disable:max-classes-per-file */
 
-import { EventListener, AsynchronousDomainEventBus, HandleDomainEvent } from '../..';
-import { SimpleDomainEventStream, DomainMessage, DomainEvent } from '../../../Domain';
 import { UuidIdentity } from '../../../ValueObject/UuidIdentity';
+import { DomainEvent } from '../../../Domain/DomainEvent';
+import { AsynchronousDomainEventBus } from '../AsynchronousDomainEventBus';
+import { HandleDomainEvent } from '../../HandleDomainEvent';
+import { SimpleDomainEventStream } from '../../../Domain/SimpleDomainEventStream';
+import { EventListener } from '../../EventListener';
+import { DomainMessage } from '../../../Domain/DomainMessage';
 
 it('Knows when it\'s not handling anything', async () => {
   const bus = new AsynchronousDomainEventBus();

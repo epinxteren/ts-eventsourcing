@@ -1,7 +1,7 @@
 import { DomainEventStreamDecorator } from '../DomainEventStreamDecorator';
 import { DomainEventStream } from '../DomainEventStream';
-import { EventSourcedAggregateRoot } from '../../EventSourcing';
 import { DomainMessage } from '../DomainMessage';
+import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
 
 export class OverrideDateDomainEventStreamDecorator implements DomainEventStreamDecorator {
 

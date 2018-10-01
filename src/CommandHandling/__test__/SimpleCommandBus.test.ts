@@ -1,13 +1,11 @@
 /* tslint:disable:max-classes-per-file */
 
-import {
-  CommandHandler,
-  HandleCommand,
-  Command,
-  CommandHandlerAlreadyRegisteredError,
-  CommandHandlerNotRegisteredError,
-  SimpleCommandBus,
-} from '../';
+import { SimpleCommandBus } from '../SimpleCommandBus';
+import { HandleCommand } from '../HandleCommand';
+import { CommandHandlerAlreadyRegisteredError } from '../Error/CommandHandlerAlreadyRegisteredError';
+import { Command } from '../Command';
+import { CommandHandlerNotRegisteredError } from '../Error/CommandHandlerNotRegisteredError';
+import { CommandHandler } from '../CommandHandler';
 
 it('Should handle single command', () => {
   const simpleBus = new SimpleCommandBus();

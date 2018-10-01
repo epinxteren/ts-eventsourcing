@@ -1,5 +1,5 @@
 import { ReadModel } from './ReadModel';
-import { Identity } from '..';
+import { Identity } from '../ValueObject/Identity';
 
 /**
  * Simple read model, nothing more then a data container.
