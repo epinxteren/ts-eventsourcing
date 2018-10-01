@@ -1,7 +1,5 @@
+import { throwError as observableThrowError } from 'rxjs';
 import { ReplayService } from '../ReplayService';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/throw';
-
 import { DomainEventStream } from '../Domain/DomainEventStream';
 import { SimpleDomainEventStream } from '../Domain/SimpleDomainEventStream';
 
@@ -22,7 +20,7 @@ it('Can replay streams', async () => {
 
 it('Knows when stream fails streams', async () => {
   const eventStoreMock = {
-    loadAll: jest.fn().mockReturnValue(new SimpleDomainEventStream(Observable.throw(new Error('Test')))),
+    loadAll: jest.fn().mockReturnValue(new SimpleDomainEventStream(observableThrowError(new Error('Test')))),
   };
   const domainEventBus = {
     publish: (stream: DomainEventStream) => {

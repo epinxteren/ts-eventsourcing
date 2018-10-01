@@ -1,4 +1,4 @@
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 import { EventStore } from './EventStore/EventStore';
 import { DomainEventBus } from './EventHandling/DomainEventBus';
 import { SimpleDomainEventStream } from './Domain/SimpleDomainEventStream';

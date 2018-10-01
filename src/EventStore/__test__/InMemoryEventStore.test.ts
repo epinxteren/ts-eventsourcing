@@ -5,6 +5,7 @@ import { InMemoryEventStore } from '../InMemoryEventStore';
 import { EventStreamNotFoundException } from '../Error/EventStreamNotFoundException';
 import { SimpleDomainEventStream } from '../../Domain/SimpleDomainEventStream';
 import { DomainMessage } from '../../Domain/DomainMessage';
+import { toArray } from 'rxjs/operators';
 
 class DomainEvent {
 
@@ -30,7 +31,7 @@ describe('InMemoryEventStore', () => {
     const event = new DomainMessage(id, 0, new DomainEvent(), date);
     const eventstream = SimpleDomainEventStream.of([event]);
     await repository.append(id, eventstream);
-    expect(await repository.load(id).toArray().toPromise()).toEqual([event]);
+    expect(await repository.load(id).pipe(toArray()).toPromise()).toEqual([event]);
   });
 
   it('Can append multiple domain events at once', async () => {
@@ -40,7 +41,7 @@ describe('InMemoryEventStore', () => {
     const event2 = new DomainMessage(id, 1, new DomainEvent(), date);
     const eventStream = SimpleDomainEventStream.of([event1, event2]);
     await repository.append(id, eventStream);
-    expect(await repository.load(id).toArray().toPromise()).toEqual([event1, event2]);
+    expect(await repository.load(id).pipe(toArray()).toPromise()).toEqual([event1, event2]);
   });
 
   it('Can append multiple domain events streams', async () => {
@@ -54,7 +55,7 @@ describe('InMemoryEventStore', () => {
     const event4 = new DomainMessage(id, 3, new DomainEvent(), date);
     const eventstream2 = SimpleDomainEventStream.of([event3, event4]);
     await repository.append(id, eventstream2);
-    expect(await repository.load(id).toArray().toPromise()).toEqual([event1, event2, event3, event4]);
+    expect(await repository.load(id).pipe(toArray()).toPromise()).toEqual([event1, event2, event3, event4]);
   });
 
   it('Can have multiple different events streams', async () => {
@@ -72,8 +73,8 @@ describe('InMemoryEventStore', () => {
     await repository.append(aggregate2Id, aggregate2Stream);
 
     expect(repository).toMatchSnapshot('InMemoryEventStore');
-    expect(await repository.load(aggregate1Id).toArray().toPromise()).toEqual([event1Aggregate1, event2Aggregate1]);
-    expect(await repository.load(aggregate2Id).toArray().toPromise()).toEqual([event1Aggregate2, event2Aggregate2]);
+    expect(await repository.load(aggregate1Id).pipe(toArray()).toPromise()).toEqual([event1Aggregate1, event2Aggregate1]);
+    expect(await repository.load(aggregate2Id).pipe(toArray()).toPromise()).toEqual([event1Aggregate2, event2Aggregate2]);
   });
 
   it('Throws an exception when playhead is not correct', async () => {
@@ -100,7 +101,7 @@ describe('InMemoryEventStore', () => {
     await store.append(id2, eventStream2);
 
     const all = store.loadAll();
-    expect(await all.toArray().toPromise()).toEqual([event1, event2]);
+    expect(await all.pipe(toArray()).toPromise()).toEqual([event1, event2]);
   });
 
   it('Can load from certain playhead', async () => {
@@ -114,7 +115,7 @@ describe('InMemoryEventStore', () => {
 
     await store.append(id, eventStream);
     const fromPlayhead = store.loadFromPlayhead(id, 2);
-    expect(await fromPlayhead.toArray().toPromise()).toEqual([event3, event4]);
+    expect(await fromPlayhead.pipe(toArray()).toPromise()).toEqual([event3, event4]);
   });
 
   it('Knows it has an event stream', async () => {

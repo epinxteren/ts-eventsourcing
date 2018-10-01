@@ -1,7 +1,7 @@
 import { SimpleDomainEventStream } from '../../SimpleDomainEventStream';
 import { DomainMessage } from '../../DomainMessage';
 import { AsyncDomainEventStreamMetadataDecorator } from '../AsyncDomainEventStreamMetadataDecorator';
-import 'rxjs/add/operator/toArray';
+import { toArray } from 'rxjs/operators';
 
 it('Does nothing by default', async () => {
   const decorator = new AsyncDomainEventStreamMetadataDecorator();
@@ -12,7 +12,7 @@ it('Does nothing by default', async () => {
   } as any;
   const stream = SimpleDomainEventStream.of([message]);
   const decorated = decorator.decorate(null as any, stream);
-  const result = await decorated.toArray().toPromise();
+  const result = await decorated.pipe(toArray()).toPromise();
   expect(result).toEqual([{
     metadata: {
       test: 'hi!',
@@ -32,7 +32,7 @@ it('Can set variables on domain event metadata', async () => {
   decorator.setVariables({
     someVariable: 'someValue',
   });
-  const result = await decorated.toArray().toPromise();
+  const result = await decorated.pipe(toArray()).toPromise();
   expect(result).toEqual([{
     metadata: {
       test: 'hi!',

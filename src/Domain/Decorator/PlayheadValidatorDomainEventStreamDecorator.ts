@@ -3,7 +3,7 @@ import { DomainEventStream } from '../DomainEventStream';
 import { SimpleDomainEventStream } from '../SimpleDomainEventStream';
 import { PlayheadError } from '../Error/PlayheadError';
 import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
-import 'rxjs/add/operator/do';
+import { tap } from 'rxjs/operators';
 
 export class PlayheadValidatorDomainEventStreamDecorator implements DomainEventStreamDecorator {
 
@@ -12,7 +12,7 @@ export class PlayheadValidatorDomainEventStreamDecorator implements DomainEventS
   }
 
   public validate(stream: DomainEventStream): DomainEventStream {
-    return new SimpleDomainEventStream(stream.do(message => {
+    return new SimpleDomainEventStream(stream.pipe(tap(message => {
       if (this.playhead === null) {
         this.playhead = message.playhead;
       }
@@ -21,7 +21,7 @@ export class PlayheadValidatorDomainEventStreamDecorator implements DomainEventS
       }
       this.playhead += 1;
       return true;
-    }));
+    })));
   }
 
   public decorate(_aggregate: EventSourcedAggregateRoot, stream: DomainEventStream): DomainEventStream {

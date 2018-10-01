@@ -3,7 +3,7 @@ import { DomainMessage } from '../DomainMessage';
 import { DomainEventStream } from '../DomainEventStream';
 import { SimpleDomainEventStream } from '../SimpleDomainEventStream';
 import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
-import 'rxjs/add/operator/map';
+import { map } from 'rxjs/operators';
 
 export class DomainEventStreamMetadataDecorator implements DomainEventStreamDecorator {
 
@@ -13,10 +13,10 @@ export class DomainEventStreamMetadataDecorator implements DomainEventStreamDeco
 
   public decorate(_aggregate: EventSourcedAggregateRoot, stream: DomainEventStream): DomainEventStream {
     const variables = this.variables;
-    const decorated = stream.map((message: DomainMessage) => {
+    const decorated = stream.pipe(map((message: DomainMessage) => {
       Object.assign(message.metadata, variables);
       return message;
-    });
+    }));
     return new SimpleDomainEventStream(decorated);
   }
 }

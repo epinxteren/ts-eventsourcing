@@ -489,7 +489,7 @@ export class EventSourcingTestBench {
    *   // Verify event store.
    *   const store = testBench.getEventStore(Order);
    *   const stream = await store.load(id);
-   *   expect(await stream.toArray().toPromise()).toEqual([
+   *   expect(await stream.pipe(toArray()).toPromise()).toEqual([
    *     new DomainMessage(id, 0, new OrderCreated(), testBench.getCurrentTime()),
    *   ]);
    *

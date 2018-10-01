@@ -6,7 +6,7 @@ import { AggregateHandleEvent } from '../AggregateHandleEvent';
 import { EventSourcedAggregateRoot } from '../EventSourcedAggregateRoot';
 import { DomainMessage } from '../../Domain/DomainMessage';
 import { EventSourcedEntity } from '../EventSourcedEntity';
-import 'rxjs/add/operator/toArray';
+import { toArray } from 'rxjs/operators';
 
 /* tslint:disable:max-classes-per-file */
 
@@ -110,12 +110,12 @@ describe('EventSourcedAggregateRoot', () => {
     const aggregate = new Product(identity);
     aggregate.changeStock(10);
     expect(aggregate.stock).toBe(10);
-    const actual = await aggregate.getUncommittedEvents().toArray().toPromise();
+    const actual = await aggregate.getUncommittedEvents().pipe(toArray()).toPromise();
     expect(actual[0].payload).toEqual(new ProductStockHasChanged(10));
     expect(actual[0].playhead).toEqual(0);
     expect(actual[0].aggregateId).toEqual(identity);
     expect(actual.length).toBe(1);
-    const actual2 = await aggregate.getUncommittedEvents().toArray().toPromise();
+    const actual2 = await aggregate.getUncommittedEvents().pipe(toArray()).toPromise();
     expect(actual2.length).toBe(0);
   });
 
@@ -126,7 +126,7 @@ describe('EventSourcedAggregateRoot', () => {
     aggregate.setName('test');
     expect(aggregate.stock).toBe(10);
     expect(aggregate.name).toBe('test');
-    const actual = await aggregate.getUncommittedEvents().toArray().toPromise();
+    const actual = await aggregate.getUncommittedEvents().pipe(toArray()).toPromise();
     expect(actual[0].payload).toEqual(new ProductStockHasChanged(10));
     expect(actual[0].playhead).toEqual(0);
     expect(actual[0].aggregateId).toEqual(identity);

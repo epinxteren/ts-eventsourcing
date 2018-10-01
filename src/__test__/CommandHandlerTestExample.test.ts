@@ -9,6 +9,7 @@ import { CommandHandler } from '../CommandHandling/CommandHandler';
 import { EventSourcingRepositoryInterface } from '../EventSourcing/EventSourcingRepositoryInterface';
 import { HandleCommand } from '../CommandHandling/HandleCommand';
 import { DomainMessage } from '../Domain/DomainMessage';
+import { toArray } from 'rxjs/operators';
 
 class OrderId extends UuidIdentity {
 
@@ -97,7 +98,7 @@ it('Can do manual assert by callback', async () => {
       // Verify event store.
       const store = testBench.getEventStore(Order);
       const stream = await store.load(id);
-      expect(await stream.toArray().toPromise()).toEqual([
+      expect(await stream.pipe(toArray()).toPromise()).toEqual([
         new DomainMessage(id, 0, new OrderCreated(), testBench.getCurrentTime()),
       ]);
 

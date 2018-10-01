@@ -16,6 +16,7 @@ import { Identity } from '../../ValueObject/Identity';
 import { DomainMessage } from '../../Domain/DomainMessage';
 import { EventSourcingRepository } from '../../EventSourcing/Repository/EventSourcingRepository';
 import { EventListener } from '../../EventHandling/EventListener';
+import { toArray } from 'rxjs/operators';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
 
@@ -234,7 +235,7 @@ describe('Given domain events should be assigned to corresponding aggregate stor
 
     const context = testBench.getAggregateTestContext(TestAggregate);
     const stream = await context.getEventStore().loadAll();
-    const messages = await stream.toArray().toPromise();
+    const messages = await stream.pipe(toArray()).toPromise();
 
     expect(messages).toEqual([
       new DomainMessage(id, 0, new TestEvent(), testBench.getCurrentTime()),
@@ -262,7 +263,7 @@ describe('Given domain events should be assigned to corresponding aggregate stor
 
     const context = testBench.getAggregateTestContext(TestAggregate);
     const stream = await context.getEventStore().loadAll();
-    const messages = await stream.toArray().toPromise();
+    const messages = await stream.pipe(toArray()).toPromise();
 
     expect(messages).toEqual([
       new DomainMessage(id1, 0, new TestEvent(), testBench.getCurrentTime()),
@@ -295,7 +296,7 @@ describe('Given domain events should be assigned to corresponding aggregate stor
 
     const context1 = testBench.getAggregateTestContext(TestAggregate);
     const stream1 = await context1.getEventStore().loadAll();
-    const messages1 = await stream1.toArray().toPromise();
+    const messages1 = await stream1.pipe(toArray()).toPromise();
 
     expect(messages1).toEqual([
       new DomainMessage(id1, 0, new TestEvent(), testBench.getCurrentTime()),
@@ -303,7 +304,7 @@ describe('Given domain events should be assigned to corresponding aggregate stor
 
     const context2 = testBench.getAggregateTestContext(TestAggregate2);
     const stream2 = await context2.getEventStore().loadAll();
-    const messages2 = await stream2.toArray().toPromise();
+    const messages2 = await stream2.pipe(toArray()).toPromise();
 
     expect(messages2).toEqual([
       new DomainMessage(id2, 0, new TestEvent(), testBench.getCurrentTime()),
@@ -363,7 +364,7 @@ describe('whenDomainMessagesHappened should dispatch messages on event bus', () 
 
     const stream: DomainEventStream = mock.mock.calls[0][0];
 
-    expect(await stream.toArray().toPromise()).toEqual([
+    expect(await stream.pipe(toArray()).toPromise()).toEqual([
       new DomainMessage(id, 0, new TestEvent(), testBench.getCurrentTime()),
       new DomainMessage(id, 1, new TestEvent(), testBench.getCurrentTime()),
     ]);

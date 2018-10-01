@@ -4,7 +4,7 @@ import { EventStreamNotFoundException } from './Error/EventStreamNotFoundExcepti
 import { DomainEventStream } from '../Domain/DomainEventStream';
 import { SimpleDomainEventStream } from '../Domain/SimpleDomainEventStream';
 import { PlayheadValidatorDomainEventStreamDecorator } from '../Domain/Decorator/PlayheadValidatorDomainEventStreamDecorator';
-import 'rxjs/add/operator/toArray';
+import { toArray } from 'rxjs/operators';
 
 export class InMemoryEventStore<Id extends Identity = Identity> implements EventStore<Id> {
 
@@ -49,7 +49,7 @@ export class InMemoryEventStore<Id extends Identity = Identity> implements Event
     const eventStream = this.events[idString];
     const combinedStream = eventStream.append(eventstream);
     const validator = new PlayheadValidatorDomainEventStreamDecorator();
-    const result = await validator.validate(combinedStream).toArray().toPromise();
+    const result = await validator.validate(combinedStream).pipe(toArray()).toPromise();
     this.events[idString] = SimpleDomainEventStream.of(result);
   }
 

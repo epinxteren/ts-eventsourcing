@@ -9,6 +9,11 @@ module.exports = {
         "!**/build",
         "!**/.stryker-tmp"
     ],
+    coverageReporters: [
+        "json-summary",
+        "text",
+        "lcov"
+    ],
     modulePathIgnorePatterns: [
         ".stryker-tmp"
     ],

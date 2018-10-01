@@ -9,7 +9,7 @@ import {
 } from '../../EventSourcing/EventSourcedAggregateRoot';
 import { Identity } from '../../ValueObject/Identity';
 import { DomainMessage } from '../../Domain/DomainMessage';
-import 'rxjs/add/operator/toArray';
+import { toArray } from 'rxjs/operators';
 
 export class AggregateTestContextCollection {
   public readonly aggregateMap: { [aggregateClassName: string]: AggregateTestContext<any> } = {};
@@ -39,7 +39,7 @@ export class AggregateTestContextCollection {
       const context = this.aggregateMap[aggregateClassName];
       const store = context.getEventStore();
       const events = store.loadAll();
-      result[aggregateClassName] = await events.toArray().toPromise();
+      result[aggregateClassName] = await events.pipe(toArray()).toPromise();
     }
     return result;
   }

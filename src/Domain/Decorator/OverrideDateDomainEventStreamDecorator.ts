@@ -2,6 +2,7 @@ import { DomainEventStreamDecorator } from '../DomainEventStreamDecorator';
 import { DomainEventStream } from '../DomainEventStream';
 import { DomainMessage } from '../DomainMessage';
 import { EventSourcedAggregateRoot } from '../../EventSourcing/EventSourcedAggregateRoot';
+import { map } from 'rxjs/operators';
 
 export class OverrideDateDomainEventStreamDecorator implements DomainEventStreamDecorator {
 
@@ -10,7 +11,7 @@ export class OverrideDateDomainEventStreamDecorator implements DomainEventStream
   }
 
   public decorate(_aggregate: EventSourcedAggregateRoot, stream: DomainEventStream): DomainEventStream {
-    return stream.map((message) => {
+    return stream.pipe(map((message) => {
       return new DomainMessage(
         message.aggregateId,
         message.playhead,
@@ -18,7 +19,7 @@ export class OverrideDateDomainEventStreamDecorator implements DomainEventStream
         this.getDate(),
         message.metadata,
       );
-    });
+    }));
   }
 
 }

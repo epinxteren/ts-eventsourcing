@@ -7,16 +7,9 @@ import { allHandleDomainEventMetadata, DomainEventHandlerMetadata } from '../Han
 import { ClassUtil } from '../../ClassUtil';
 import { DomainEventStream } from '../../Domain/DomainEventStream';
 import { DomainMessage } from '../../Domain/DomainMessage';
-import { Subscription } from 'rxjs/Subscription';
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/concat';
-import 'rxjs/add/operator/first';
-import 'rxjs/add/operator/toArray';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/concatMap';
-import 'rxjs/add/observable/fromPromise';
-import 'rxjs/add/observable/empty';
+import { Subscription, Subject, Observable, of, concat, EMPTY } from 'rxjs';
+import { concatMap, first } from 'rxjs/operators';
+import { fromPromise } from 'rxjs/internal-compatibility';
 
 /**
  * Always passes all events in sequence to the event corresponding handlers.
@@ -55,10 +48,10 @@ export class AsynchronousDomainEventBus implements DomainEventBus {
    * Knows when everything is handled.
    */
   public untilIdle(): Promise<void> {
-    return Observable.of(this.isProcessing)
-                     .concat(this.isProcessingSubject)
-                     .first((processing) => !processing)
-                     .toPromise().then(() => undefined);
+    return concat(of(this.isProcessing), this.isProcessingSubject)
+      .pipe(
+        first((processing) => !processing),
+      ).toPromise().then(() => undefined);
   }
 
   public publish(stream: DomainEventStream): void {
@@ -102,14 +95,14 @@ export class AsynchronousDomainEventBus implements DomainEventBus {
   };
 
   private subscribeToNextStream(stream: DomainEventStream) {
-    const handledStream: Observable<any> = stream.concatMap((message: DomainMessage) => {
+    const handledStream: Observable<any> = stream.pipe(concatMap((message: DomainMessage) => {
       const eventName: string = ClassUtil.nameOffInstance(message.payload);
       const handlers = this.eventHandlersMappedByEvent[eventName];
       if (!handlers) {
-        return Observable.empty();
+        return EMPTY;
       }
-      return Observable.fromPromise(Promise.all(handlers.map((handler) => handler(message))));
-    });
+      return fromPromise(Promise.all(handlers.map((handler) => handler(message))));
+    }));
     this.activeStreamSubscription = handledStream.subscribe(undefined, this.errorHandler, this.onComplete);
   }
 

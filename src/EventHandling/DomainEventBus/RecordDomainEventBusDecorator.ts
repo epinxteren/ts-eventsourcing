@@ -5,6 +5,7 @@ import { DomainEventBus } from '../DomainEventBus';
 import { EventListener } from '../EventListener';
 import { DomainMessage } from '../../Domain/DomainMessage';
 import { DomainEventStream } from '../../Domain/DomainEventStream';
+import { tap } from 'rxjs/operators';
 
 /**
  * For recording messages that are put on the bus.
@@ -24,9 +25,9 @@ export class RecordDomainEventBusDecorator implements DomainEventBus {
   }
 
   public publish(stream: DomainEventStream): void {
-    this.bus.publish(stream.do((message: DomainMessage) => {
+    this.bus.publish(stream.pipe(tap((message: DomainMessage) => {
       this.messages.push(message);
-    }));
+    })));
   }
 
   public getMessages(): DomainMessage[] {
