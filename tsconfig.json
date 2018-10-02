@@ -16,6 +16,7 @@
     "sourceMap": false,                        /* Generates corresponding '.map' file. */
     "inlineSources": true,
     "inlineSourceMap": true,
+    "sourceRoot": "/",
     "declaration": true,                      /* Generates corresponding '.d.ts' file. */
 
     /* Strict Type-Checking Options */
