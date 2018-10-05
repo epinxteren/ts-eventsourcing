@@ -13,11 +13,7 @@
 
     /* Basic Options */
     "skipLibCheck": true,                     /* Skip type checking of declaration files.  */
-    "sourceMap": false,                        /* Generates corresponding '.map' file. */
-    "inlineSources": true,
-    "inlineSourceMap": true,
-    "sourceRoot": "/",
-    "declaration": true,                      /* Generates corresponding '.d.ts' file. */
+    "sourceMap": true,                        /* Generates corresponding '.map' file. */
 
     /* Strict Type-Checking Options */
     "strict": true,                           /* Enable all strict type-checking options. */

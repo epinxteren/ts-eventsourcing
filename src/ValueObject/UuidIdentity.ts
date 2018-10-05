@@ -5,7 +5,7 @@ import { UuidError } from './Error/UuidError';
 
 export class UuidIdentity implements Identity {
 
-  public static create() {
+  public static create<T extends UuidIdentity>(this: new (id: string) => T): T {
     return new this(uuid());
   }
 

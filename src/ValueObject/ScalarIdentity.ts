@@ -2,8 +2,8 @@ import { Identity } from './Identity';
 
 export class ScalarIdentity<T> implements Identity {
 
-  public static create<T>(value: T) {
-    return new this<T>(value);
+  public static create<V, T extends ScalarIdentity<V>>(this: new (id: V) => T, value: V): T {
+    return new this(value);
   }
 
   public static of(id: Identity) {
