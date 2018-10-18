@@ -166,3 +166,16 @@ it('Can test a projector with snapshot', async () => {
     .thenModelsShouldMatchSnapshot()
     .thenShouldMatchSnapshot();
 });
+
+it('Can catch a projectors error', async () => {
+  const id = new UserId('270df21f-1cdb-4518-bc07-432464799df6');
+  await EventSourcingTestBench
+    .create()
+    .givenEventListener((testBench) => {
+      return new UserLoggedInCountProjector(testBench.getReadModelRepository(UserLogInStatistics));
+    })
+    .throws(`Model with id ${id.toString()} not found`)
+    .whenEventsHappened(id, [
+      new UserHasLoggedIn(),
+    ]);
+});

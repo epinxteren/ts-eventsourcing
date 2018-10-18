@@ -5,6 +5,7 @@
 import { ReadModel } from './ReadModel';
 import { Repository } from './Repository';
 import { Identity } from '../ValueObject/Identity';
+import { ModelNotFoundException } from './Error/ModelNotFoundException';
 
 export class InMemoryRepository<Model extends ReadModel<Id>, Id extends Identity = Identity> implements Repository<Model, Id> {
   protected models: { [identity: string]: Model } = {};
@@ -26,12 +27,12 @@ export class InMemoryRepository<Model extends ReadModel<Id>, Id extends Identity
     return Promise.resolve(this.models[idString]);
   }
 
-  public get(id: Id): Promise<Model> {
+  public async get(id: Id): Promise<Model> {
     const idString = id.toString();
     if (typeof this.models[idString] === 'undefined') {
-      return Promise.reject(`Model with id ${idString} not found`);
+      throw ModelNotFoundException.byId(id);
     }
-    return Promise.resolve(this.models[idString]);
+    return this.models[idString];
   }
 
   public async findBy(fields: { [key: string]: any }): Promise<Model[]> {

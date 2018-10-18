@@ -1,5 +1,6 @@
 import { EventSourcedAggregateRoot } from './EventSourcedAggregateRoot';
 import { DomainEvent } from '../Domain/DomainEvent';
+import { getAggregateEventHandler } from './AggregateHandleEvent';
 
 export class EventSourcedEntity<T extends EventSourcedAggregateRoot = EventSourcedAggregateRoot> {
 
@@ -8,7 +9,7 @@ export class EventSourcedEntity<T extends EventSourcedAggregateRoot = EventSourc
 
   protected handle(event: DomainEvent) {
     const method = this.getHandlersName(event);
-    if (typeof (this as any)[method] !== 'function') {
+    if (!method) {
       return;
     }
     (this as any)[method](event);
@@ -25,9 +26,8 @@ export class EventSourcedEntity<T extends EventSourcedAggregateRoot = EventSourc
     return [];
   }
 
-  private getHandlersName(event: DomainEvent): string {
-    const { constructor } = Object.getPrototypeOf(event);
-    return `apply${constructor.name}`;
+  protected getHandlersName(event: DomainEvent): string | null {
+    return getAggregateEventHandler(this, event);
   }
 }
 

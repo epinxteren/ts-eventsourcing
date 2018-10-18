@@ -3,6 +3,7 @@ import { ScalarIdentity } from '../../ValueObject/ScalarIdentity';
 import { InMemoryRepository } from '../InMemoryRepository';
 import { ReadModel } from '../ReadModel';
 import { Identity } from '../../ValueObject/Identity';
+import { ModelNotFoundException } from '../Error/ModelNotFoundException';
 
 class TestReadModel implements ReadModel {
 
@@ -90,7 +91,7 @@ describe('InMemoryRepository', () => {
   it('Throws error when model is not found', async () => {
     const repository = new InMemoryRepository<TestReadModel>();
     const id = new ScalarIdentity('123');
-    await expect(repository.get(id)).rejects.toEqual('Model with id 123 not found');
+    await expect(repository.get(id)).rejects.toEqual(ModelNotFoundException.byId(id));
   });
 
   it('Can find model from store', async () => {

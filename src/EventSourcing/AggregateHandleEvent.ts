@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { EventSourcedEntity } from './EventSourcedEntity';
 import { IncorrectEventHandlerError } from './Error/IncorrectEventHandlerError';
 import { Metadata } from '../Metadata';
-import { DomainEventConstructor } from '../Domain/DomainEvent';
+import { DomainEvent, DomainEventConstructor } from '../Domain/DomainEvent';
 import { EventListenerConstructor } from '../EventHandling/EventListener';
 
 const AGGREGATE_EVENT_HANDLER = Symbol.for('aggregate_handler');
@@ -10,6 +10,17 @@ const AGGREGATE_EVENT_HANDLER = Symbol.for('aggregate_handler');
 export interface EventHandlerMetadata {
   functionName: string;
   event: DomainEventConstructor<any>;
+}
+
+export function getAggregateEventHandler(target: EventSourcedEntity, event: DomainEvent): string | null {
+  const metadata: EventHandlerMetadata[] | undefined = Metadata.getMetadata(AGGREGATE_EVENT_HANDLER, target.constructor);
+  if (!metadata) {
+    return null;
+  }
+  const found = metadata.find((eventHandlerMetadata) => {
+    return eventHandlerMetadata.event === event.constructor;
+  });
+  return found ? found.functionName : null;
 }
 
 export function allAggregateEventHandlersMetadata(target: EventSourcedEntity): EventHandlerMetadata[] {

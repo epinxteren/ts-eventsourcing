@@ -8,7 +8,7 @@ TestRepository {
   "eventBus": RecordDomainEventBusDecorator {
     "bus": AsynchronousDomainEventBus {
       "activeStreamSubscription": null,
-      "errorHandler": undefined,
+      "errorHandler": [Function],
       "eventHandlersMappedByEvent": Object {},
       "isProcessing": false,
       "isProcessingSubject": Subject {

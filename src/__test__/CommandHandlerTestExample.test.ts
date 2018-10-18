@@ -10,6 +10,7 @@ import { EventSourcingRepositoryInterface } from '../EventSourcing/EventSourcing
 import { HandleCommand } from '../CommandHandling/HandleCommand';
 import { DomainMessage } from '../Domain/DomainMessage';
 import { toArray } from 'rxjs/operators';
+import { AggregateHandleEvent } from '../EventSourcing/AggregateHandleEvent';
 
 class OrderId extends UuidIdentity {
 
@@ -43,8 +44,18 @@ class Order extends EventSourcedAggregateRoot {
     return newOrder;
   }
 
+  private shipped = false;
+
   public ship() {
+    if (this.shipped) {
+      throw new Error('Product already shipped');
+    }
     this.apply(new OrderShipped());
+  }
+
+  @AggregateHandleEvent
+  public shipOrder(_event: OrderShipped) {
+    this.shipped = true;
   }
 
 }
@@ -267,5 +278,22 @@ it('Can test different aggregates at the same time', async () => {
     .thenMatchEvents([
       new DomainMessage(orderId1, 0, new OrderCreated(), EventSourcingTestBench.defaultCurrentTime),
       new DomainMessage(customerId1, 1, new CustomerHasOrdered(orderId1), EventSourcingTestBench.defaultCurrentTime),
+    ]);
+});
+
+it('Should able to handle aggregate errors', async () => {
+  const id = OrderId.create();
+  await EventSourcingTestBench
+    .create()
+    .givenCommandHandler((testBench: EventSourcingTestBench) => {
+      return new OrderCommandHandler(testBench.getAggregateRepository(Order));
+    })
+    .given(id, Order, [
+      new OrderCreated(),
+      new OrderShipped(),
+    ])
+    .throws('Product already shipped')
+    .whenCommands([
+      new ShipOrder(id),
     ]);
 });

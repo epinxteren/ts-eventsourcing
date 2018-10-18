@@ -71,11 +71,11 @@ export class AsynchronousDomainEventBus implements DomainEventBus {
     const callback = (handler as any)[metadata.functionName].bind(handler);
     if (metadata.eventArgumentIndex === 0) {
       return (domainMessage: DomainMessage) => {
-        return Promise.resolve(callback(domainMessage.payload, domainMessage));
+        return Promise.resolve(callback(domainMessage.payload, domainMessage)).catch(this.errorHandler);
       };
     }
     return (domainMessage: DomainMessage) => {
-      return Promise.resolve(callback(domainMessage, domainMessage.payload));
+      return Promise.resolve(callback(domainMessage, domainMessage.payload)).catch(this.errorHandler);
     };
   }
 

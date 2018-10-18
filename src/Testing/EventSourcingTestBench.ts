@@ -10,17 +10,25 @@ import { DomainEventBus } from '../EventHandling/DomainEventBus';
 import { AsynchronousDomainEventBus } from '../EventHandling/DomainEventBus/AsynchronousDomainEventBus';
 import { RecordDomainEventBusDecorator } from '../EventHandling/DomainEventBus/RecordDomainEventBusDecorator';
 import { CommandHandler, CommandHandlerConstructor } from '../CommandHandling/CommandHandler';
-import { EventSourcedAggregateRoot, EventSourcedAggregateRootConstructor, isEventSourcedAggregateRootConstructor } from '../EventSourcing/EventSourcedAggregateRoot';
+import {
+  EventSourcedAggregateRoot,
+  EventSourcedAggregateRootConstructor,
+  isEventSourcedAggregateRootConstructor,
+} from '../EventSourcing/EventSourcedAggregateRoot';
 import { ReadModel, ReadModelConstructor } from '../ReadModel/ReadModel';
 import { EventSourcingRepositoryInterface } from '../EventSourcing/EventSourcingRepositoryInterface';
 import { EventListenerConstructor, EventListener } from '../EventHandling/EventListener';
 import { DomainEvent } from '../Domain/DomainEvent';
 import { SimpleDomainEventStream } from '../Domain/SimpleDomainEventStream';
-import { EventSourcingRepositoryConstructor, isEventSourcingRepositoryConstructor } from '../EventSourcing/Repository/EventSourcingRepository';
+import {
+  EventSourcingRepositoryConstructor,
+  isEventSourcingRepositoryConstructor,
+} from '../EventSourcing/Repository/EventSourcingRepository';
 import { Repository } from '../ReadModel/Repository';
 import { Command } from '../CommandHandling/Command';
 import { DomainMessage } from '../Domain/DomainMessage';
 import { DomainEventStream } from '../Domain/DomainEventStream';
+import Constructable = jest.Constructable;
 
 export interface TestTask {
   callback: () => Promise<any>;
@@ -44,6 +52,7 @@ export class EventSourcingTestBench {
     return new this(currentTime);
   }
 
+  public readonly [Symbol.toStringTag]: 'Promise';
   public readonly domainMessageFactory: DomainMessageTestFactory;
   public readonly commandBus: CommandBus = new SimpleCommandBus();
   public readonly aggregates: AggregateTestContextCollection;
@@ -54,10 +63,13 @@ export class EventSourcingTestBench {
   protected breakpoint: boolean = false;
   protected currentTime: Date;
   protected tasks: TestTask[] = [];
+  protected errors: Array<unknown> = [];
 
   constructor(currentTime: Date | string = EventSourcingTestBench.defaultCurrentTime) {
     this.currentTime = this.parseDateTime(currentTime);
-    this.asyncBus = new AsynchronousDomainEventBus();
+    this.asyncBus = new AsynchronousDomainEventBus((error) => {
+      this.errors.push(error);
+    });
     this.recordBus = new RecordDomainEventBusDecorator(this.asyncBus);
     this.eventBus = this.recordBus;
     this.aggregates = new AggregateTestContextCollection(this);
@@ -100,6 +112,7 @@ export class EventSourcingTestBench {
       }
     });
   }
+
   /**
    * Subscribe an event listener or projector to the event bus.
    *
@@ -259,6 +272,54 @@ export class EventSourcingTestBench {
       const modelTestContext = this.getReadModelTestContext<T>(modelConstructor);
       const repository = this.returnValue(repositoryOrFactory as any);
       modelTestContext.setRepository(repository);
+    });
+  }
+
+  /**
+   * Can be added before all function to verify the next task throws an error.
+   *
+   *  await testBench
+   *    .throws()
+   *    // Or
+   *    .throws('Error message')
+   *    // Or
+   *    .throws(Error)
+   *    // Or
+   *    .throws(/some error regex/)
+   *    .whenEventsHappened([
+   *       new TestErrorEvent(),
+   *    ]);
+   */
+  public throws(error?: string | Constructable | RegExp): this {
+    return this.addTask(async () => {
+      await this.thenWaitUntilProcessed();
+      const handleTask = this.handleTask;
+      this.handleTask = async (_taskDescription: string, callback: () => Promise<void>) => {
+
+        // Jest only support 'toThrowError' for none promises.
+        // Catch the error first, and throw it normally.
+        let actualError: any = null;
+        try {
+          await handleTask.call(this, _taskDescription, callback);
+
+          // Handle all tasks created by the previous task.
+          await this.toPromise();
+
+          // Then wait for all pending events on command bus.
+          await this.thenWaitUntilProcessed();
+          await this.toPromise();
+        } catch (e) {
+          actualError = e;
+        }
+
+        // Throw the error in a normally way.
+        expect(() => {
+          if (actualError) {
+            throw actualError;
+          }
+        }).toThrowError(error);
+        this.handleTask = handleTask;
+      };
     });
   }
 
@@ -435,9 +496,9 @@ export class EventSourcingTestBench {
     return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
       const data: {
-        aggregates?: {[aggregateClassName: string]: EventSourcedAggregateRoot[]},
-        messages?: {[aggregateClassName: string]: DomainMessage[]},
-        models?: {[aggregateClassName: string]: ReadModel[]},
+        aggregates?: { [aggregateClassName: string]: EventSourcedAggregateRoot[] },
+        messages?: { [aggregateClassName: string]: DomainMessage[] },
+        models?: { [aggregateClassName: string]: ReadModel[] },
       } = {};
       const aggregates = await this.aggregates.getAllAggregates();
       if (Object.getOwnPropertyNames(aggregates).length !== 0) {
@@ -541,6 +602,10 @@ export class EventSourcingTestBench {
   public thenWaitUntilProcessed() {
     return this.addTask(async () => {
       await this.asyncBus.untilIdle();
+      // Throw first error, generated on the bus.
+      if (this.errors.length) {
+        throw this.errors.shift();
+      }
     });
   }
 
@@ -608,6 +673,7 @@ export class EventSourcingTestBench {
     }
     await callback.call(this);
   }
+
   /* tslint:enable:no-debugger */
 
   private addPending(pending: TestTask): this & Promise<this> {
