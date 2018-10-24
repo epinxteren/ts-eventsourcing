@@ -17,6 +17,9 @@ import { DomainMessage } from '../../Domain/DomainMessage';
 import { EventSourcingRepository } from '../../EventSourcing/Repository/EventSourcingRepository';
 import { EventListener } from '../../EventHandling/EventListener';
 import { toArray } from 'rxjs/operators';
+import { QueryHandler } from '../../QueryHandling/QueryHandler';
+import { Query } from '../../QueryHandling/Query';
+import { HandleQuery } from '../../QueryHandling/HandleQuery';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
 
@@ -113,6 +116,110 @@ describe('givenCommandHandler should register commandHandler to the command bus'
     await testBench.givenCommandHandler(
       TestCommandHandlerWithRepository, [ProductAggregate, UserAggregate, UserReadModel]);
     expect(spy.mock.calls[0][0]).toBeInstanceOf(TestCommandHandlerWithRepository);
+    expect(spyConstructor).toBeCalledWith(
+      testBench.getAggregateTestContext(ProductAggregate).getRepository(),
+      testBench.getAggregateTestContext(UserAggregate).getRepository(),
+      testBench.getReadModelTestContext(UserReadModel).getRepository(),
+    );
+  });
+
+});
+
+describe('givenQueryHandler should register queryHandler to the query bus', () => {
+
+  class TestQuery implements Query {
+
+  }
+
+  class TestQueryHandler implements QueryHandler {
+
+    @HandleQuery
+    public handle(_query: TestQuery) {
+      // Does nothing.
+    }
+
+  }
+
+  it('by value', async () => {
+    const testBench = new EventSourcingTestBench();
+    const spy = jest.spyOn(testBench.queryBus, 'subscribe');
+    const queryHandler = new TestQueryHandler();
+    await testBench.givenQueryHandler(queryHandler);
+    expect(spy).toBeCalledWith(queryHandler);
+  });
+
+  it('by callback', async () => {
+    const testBench = new EventSourcingTestBench();
+    const spy = jest.spyOn(testBench.queryBus, 'subscribe');
+    const queryHandler = new TestQueryHandler();
+    await testBench.givenQueryHandler(() => queryHandler);
+    expect(spy).toBeCalledWith(queryHandler);
+  });
+
+  it('by constructor', async () => {
+    const spyConstructor = jest.fn();
+
+    class TestAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class TestQueryHandlerWithRepository implements QueryHandler {
+
+      constructor(repository: EventSourcingRepositoryInterface<TestAggregate>) {
+        spyConstructor(repository);
+      }
+
+      @HandleQuery
+      public handle(_query: TestQuery) {
+        // Does nothing.
+      }
+
+    }
+
+    const testBench = new EventSourcingTestBench();
+    const spy = jest.spyOn(testBench.queryBus, 'subscribe');
+    await testBench.givenQueryHandler(TestQueryHandlerWithRepository, [TestAggregate]);
+    expect(spy.mock.calls[0][0]).toBeInstanceOf(TestQueryHandlerWithRepository);
+    expect(spyConstructor).toBeCalledWith(testBench.getAggregateTestContext(TestAggregate).getRepository());
+  });
+
+  it('by constructor with multiple repositories', async () => {
+    const spyConstructor = jest.fn();
+
+    class ProductAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserReadModel implements ReadModel {
+      public getId(): Identity {
+        throw new Error('not implemented');
+      }
+    }
+
+    class TestQueryHandlerWithRepository implements QueryHandler {
+
+      constructor(productRepository: EventSourcingRepositoryInterface<ProductAggregate>,
+                  userRepository: EventSourcingRepositoryInterface<UserAggregate>,
+                  userReadModellRepository: Repository<UserReadModel>) {
+        spyConstructor(productRepository, userRepository, userReadModellRepository);
+      }
+
+      @HandleQuery
+      public handle(_query: TestQuery) {
+        // Does nothing.
+      }
+
+    }
+
+    const testBench = new EventSourcingTestBench();
+    const spy = jest.spyOn(testBench.queryBus, 'subscribe');
+    await testBench.givenQueryHandler(
+      TestQueryHandlerWithRepository, [ProductAggregate, UserAggregate, UserReadModel]);
+    expect(spy.mock.calls[0][0]).toBeInstanceOf(TestQueryHandlerWithRepository);
     expect(spyConstructor).toBeCalledWith(
       testBench.getAggregateTestContext(ProductAggregate).getRepository(),
       testBench.getAggregateTestContext(UserAggregate).getRepository(),

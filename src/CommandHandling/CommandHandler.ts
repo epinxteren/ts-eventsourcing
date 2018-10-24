@@ -5,4 +5,4 @@ export interface CommandHandler {
 
 }
 
-export type CommandHandlerConstructor = new (...args: any[]) => CommandHandler;
+export type CommandHandlerConstructor<Handler = CommandHandler> = new (...args: any[]) => Handler;
