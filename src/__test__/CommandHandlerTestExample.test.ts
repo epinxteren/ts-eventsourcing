@@ -11,6 +11,7 @@ import { HandleCommand } from '../CommandHandling/HandleCommand';
 import { DomainMessage } from '../Domain/DomainMessage';
 import { toArray } from 'rxjs/operators';
 import { AggregateHandleEvent } from '../EventSourcing/AggregateHandleEvent';
+import { QueryHandler } from '../QueryHandling/QueryHandler';
 
 class OrderId extends UuidIdentity {
 
@@ -296,4 +297,26 @@ it('Should able to handle aggregate errors', async () => {
     .whenCommands([
       new ShipOrder(id),
     ]);
+});
+
+it('Should able to execute query handler', async () => {
+  class CommandForWelcome implements Command {
+    constructor(public readonly name: string) {
+
+    }
+  }
+
+  class TestCommandHandler implements QueryHandler {
+
+    @HandleCommand
+    public handleCommand(command: CommandForWelcome) {
+      return `Welcome ${command.name}`;
+    }
+
+  }
+
+  await EventSourcingTestBench
+    .create()
+    .givenCommandHandler(new TestCommandHandler())
+    .thenCommandHandlerShouldMatchResult(new CommandForWelcome('John'), 'Welcome John');
 });

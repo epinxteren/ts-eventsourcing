@@ -29,6 +29,10 @@ import { Command } from '../CommandHandling/Command';
 import { DomainMessage } from '../Domain/DomainMessage';
 import { DomainEventStream } from '../Domain/DomainEventStream';
 import Constructable = jest.Constructable;
+import { QueryHandler, QueryHandlerConstructor } from '../QueryHandling/QueryHandler';
+import { QueryBus } from '../QueryHandling/QueryBus';
+import { SimpleQueryBus } from '../QueryHandling/SimpleQueryBus';
+import { Query } from '../QueryHandling/Query';
 
 export interface TestTask {
   callback: () => Promise<any>;
@@ -55,6 +59,7 @@ export class EventSourcingTestBench {
   public readonly [Symbol.toStringTag]: 'Promise';
   public readonly domainMessageFactory: DomainMessageTestFactory;
   public readonly commandBus: CommandBus = new SimpleCommandBus();
+  public readonly queryBus: QueryBus = new SimpleQueryBus();
   public readonly aggregates: AggregateTestContextCollection;
   public readonly models = new ReadModelTestContextCollection();
   public readonly eventBus: DomainEventBus;
@@ -109,6 +114,43 @@ export class EventSourcingTestBench {
       } else {
         const handler = this.returnValue(createOrConstructor);
         this.commandBus.subscribe(handler);
+      }
+    });
+  }
+
+  /**
+   * Give a query handler and assigned it to the query bus.
+   *
+   * @example
+   *
+   *    // By factory function.
+   *    givenQueryHandler((testBench: EventSourcingTestBench) => {
+   *      return new OrderQueryHandler(testBench.getAggregateRepository(Order));
+   *    })
+   *
+   *    // By constructor. This will inject the aggregate or model repositories as arguments.
+   *    givenQueryHandler(OrderQueryHandler, [Order])
+   *    givenQueryHandler(OrderQueryHandler, [Order, User])
+   *
+   *    // By value
+   *    givenQueryHandler(new OrderQueryHandler())
+   *
+   */
+  public givenQueryHandler(createOrHandler: ValueOrFactory<QueryHandler, this>): this;
+  public givenQueryHandler(
+    constructor: QueryHandlerConstructor,
+    classes?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+  ): this;
+  public givenQueryHandler(
+    createOrConstructor: ValueOrFactory<QueryHandler, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => QueryHandler),
+    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []) {
+    return this.addTask(async () => {
+      if (classes.length !== 0 && typeof createOrConstructor === 'function') {
+        const handler = this.createClassByRepositoryArguments(createOrConstructor as any, classes);
+        this.queryBus.subscribe(handler);
+      } else {
+        const handler = this.returnValue(createOrConstructor);
+        this.queryBus.subscribe(handler);
       }
     });
   }
@@ -388,6 +430,26 @@ export class EventSourcingTestBench {
     return this.addTask(async () => {
       const messages = this.domainMessageFactory.createDomainMessages(id, events);
       this.whenDomainMessagesHappened(messages);
+    });
+  }
+
+  /**
+   * Put a command on the command bus and match the result.
+   */
+  public thenCommandHandlerShouldMatchResult(command: Command, expectedResult: any): this {
+    return this.addTask(async () => {
+      const result = await this.commandBus.dispatch(command);
+      expect(result).toMatch(expectedResult);
+    });
+  }
+
+  /**
+   * Put a query on the query bus and match the result.
+   */
+  public thenQueryHandlerShouldMatchResult(query: Query, expectedResult: any): this {
+    return this.addTask(async () => {
+      const result = await this.queryBus.dispatch(query);
+      expect(result).toMatch(expectedResult);
     });
   }
 
