@@ -3,6 +3,8 @@
 Providing infrastructure and testing helpers for creating CQRS and event sourced applications. 
 The project contains several loosely coupled components that can be used together to provide a full CQRS\ES experience.
 
+[![Build Status](https://travis-ci.org/epinxteren/ts-eventsourcing.svg?branch=master)](https://travis-ci.org/epinxteren/ts-eventsourcing)
+
 ## Features
 - Using Typescript
 - Jest for testing
