@@ -1,5 +1,12 @@
 export class ClassUtil {
 
+  public static nameOff(instanceOrConstructor: any): string {
+    if (typeof instanceOrConstructor === 'function') {
+      return this.nameOffConstructor(instanceOrConstructor);
+    }
+    return this.nameOffInstance(instanceOrConstructor);
+  }
+
   public static nameOffInstance(instance: any): string {
     return this.nameOffConstructor(Object.getPrototypeOf(instance).constructor);
   }

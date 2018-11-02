@@ -2,4 +2,4 @@ export interface DomainEvent {
 
 }
 
-export type DomainEventConstructor<T extends DomainEvent> = new (...args: any[]) => T;
+export type DomainEventConstructor<T extends DomainEvent = DomainEvent> = new (...args: any[]) => T;

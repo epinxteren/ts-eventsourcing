@@ -36,7 +36,7 @@ export class AsynchronousDomainEventBus implements DomainEventBus {
   public subscribe(eventListener: EventListener): void {
     const handlers = allHandleDomainEventMetadata(eventListener);
     handlers.forEach((metadata) => {
-      const eventName: string = ClassUtil.nameOffConstructor(metadata.event);
+      const eventName: string = ClassUtil.nameOff(metadata.event);
       if (!this.eventHandlersMappedByEvent[eventName]) {
         this.eventHandlersMappedByEvent[eventName] = [];
       }

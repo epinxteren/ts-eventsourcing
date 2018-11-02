@@ -12,4 +12,9 @@ export class IncorrectDomainEventHandlerError extends Error {
     const eventHandlerName = ClassUtil.nameOffInstance(eventHandler);
     return new this(`To many arguments for ${eventHandlerName}.${functionName}`);
   }
+
+  public static specifyOneEvent(eventHandler: EventListenerConstructor, functionName: string) {
+    const eventHandlerName = ClassUtil.nameOffInstance(eventHandler);
+    return new this(`Specify at least one event (HandleDomainEvent(<Event>)) or don't use it as function (${eventHandlerName}.${functionName})`);
+  }
 }

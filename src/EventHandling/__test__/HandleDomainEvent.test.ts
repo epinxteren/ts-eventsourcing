@@ -14,7 +14,7 @@ it('Should be able te register an event handler', () => {
   class TestEventHandler implements EventListener {
     @HandleDomainEvent
     public hasBoughtCar(_event: UserHasBoughtACarEvent) {
-        // noop
+      // noop
     }
   }
 
@@ -120,6 +120,125 @@ it('Should not have more then 2 arguments', () => {
     class TestEventHandler implements EventListener {
       @HandleDomainEvent
       public hasBoughtCar(_event: UserHasBoughtACarEvent, _message: DomainMessage<UserHasBoughtACarEvent>, _extraArg: number) {
+        // noop
+      }
+    }
+
+    return new TestEventHandler();
+  }).toThrowError(IncorrectDomainEventHandlerError);
+});
+
+it('Should be able te register an event handler for multiple events', () => {
+
+  class UserHasSoldACarEvent implements DomainEvent {
+
+  }
+
+  class TestEventHandler implements EventListener {
+    @HandleDomainEvent(UserHasSoldACarEvent, UserHasBoughtACarEvent)
+    public hasBoughtOrSoldCar(_event: UserHasBoughtACarEvent | UserHasBoughtACarEvent) {
+      // noop
+    }
+  }
+
+  const handler = new TestEventHandler();
+  const metadata = allHandleDomainEventMetadata(handler);
+
+  expect(metadata).toEqual([
+    {
+      functionName: 'hasBoughtOrSoldCar',
+      event: UserHasSoldACarEvent,
+      eventArgumentIndex: 0,
+    },
+    {
+      functionName: 'hasBoughtOrSoldCar',
+      event: UserHasBoughtACarEvent,
+      eventArgumentIndex: 0,
+    },
+  ]);
+});
+
+it('Should be able te register an event handler for multiple events with domain message argument', () => {
+
+  class UserHasSoldACarEvent implements DomainEvent {
+
+  }
+
+  class TestEventHandler implements EventListener {
+    @HandleDomainEvent(UserHasSoldACarEvent, UserHasBoughtACarEvent)
+    public hasBoughtOrSoldCar(_message: DomainMessage<UserHasBoughtACarEvent | UserHasSoldACarEvent>, _event: UserHasBoughtACarEvent | UserHasSoldACarEvent) {
+      // noop
+    }
+  }
+
+  const handler = new TestEventHandler();
+  const metadata = allHandleDomainEventMetadata(handler);
+
+  expect(metadata).toEqual([
+    {
+      functionName: 'hasBoughtOrSoldCar',
+      event: UserHasSoldACarEvent,
+      eventArgumentIndex: 1,
+    },
+    {
+      functionName: 'hasBoughtOrSoldCar',
+      event: UserHasBoughtACarEvent,
+      eventArgumentIndex: 1,
+    },
+  ]);
+});
+
+it('Should be able te register an event handler for multiple events for multiple handlers', () => {
+
+  class UserHasSoldACarEvent implements DomainEvent {
+
+  }
+
+  class TestEventHandler implements EventListener {
+    @HandleDomainEvent(UserHasSoldACarEvent, UserHasBoughtACarEvent)
+    public hasBoughtOrSoldCar(_message: DomainMessage<UserHasBoughtACarEvent | UserHasSoldACarEvent>, _event: UserHasBoughtACarEvent | UserHasSoldACarEvent) {
+      // noop
+    }
+
+    @HandleDomainEvent(UserHasSoldACarEvent, UserHasBoughtACarEvent)
+    public hasSoldOrBoughtCar(_event: UserHasBoughtACarEvent | UserHasSoldACarEvent, _message: DomainMessage<UserHasBoughtACarEvent | UserHasSoldACarEvent>) {
+      // noop
+    }
+  }
+
+  const handler = new TestEventHandler();
+  const metadata = allHandleDomainEventMetadata(handler);
+
+  expect(metadata).toEqual([
+    {
+      functionName: 'hasBoughtOrSoldCar',
+      event: UserHasSoldACarEvent,
+      eventArgumentIndex: 1,
+    },
+    {
+      functionName: 'hasBoughtOrSoldCar',
+      event: UserHasBoughtACarEvent,
+      eventArgumentIndex: 1,
+    },
+    {
+      functionName: 'hasSoldOrBoughtCar',
+      event: UserHasSoldACarEvent,
+      eventArgumentIndex: 0,
+    },
+    {
+      functionName: 'hasSoldOrBoughtCar',
+      event: UserHasBoughtACarEvent,
+      eventArgumentIndex: 0,
+    },
+  ]);
+});
+
+it('Should always give events when used as function', () => {
+
+  expect(() => {
+    class TestEventHandler implements EventListener {
+      @HandleDomainEvent()
+      public hasBoughtCar() {
         // noop
       }
     }

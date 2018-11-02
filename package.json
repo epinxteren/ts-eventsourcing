@@ -1,13 +1,13 @@
 {
   "name": "ts-eventsourcing",
   "private": false,
-  "version": "1.1.9",
+  "version": "1.1.11",
   "description": "Typed event sourcing framework",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
     "publish-build": "rm -fr build && yarn copy-config-files && cd build && yarn tsc && yarn publish && cd -",
-    "copy-config-files": "yarn cpy '(package.json|README.md|.npmignore|assets)' build/. && cp tsconfig.build.json build/tsconfig.json && cp -r src build/. && cp -r assets build/.",
+    "copy-config-files": "yarn cpy '(package.json|README.md|.npmignore|assets)' build/. && cp tsconfig.build.json build/tsconfig.json && cp -r src build/.",
     "watch": "tsc --watch",
     "test": "npm-run-all --parallel jest-coverage tslint jscpd tsc",
     "jest": "jest",
