@@ -28,7 +28,8 @@
     "cyclomatic-complexity": [
       true,
       12
-    ]
+    ],
+    "no-reference": false
   },
   "rulesDirectory": []
 }

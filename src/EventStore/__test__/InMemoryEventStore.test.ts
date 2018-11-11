@@ -128,4 +128,16 @@ describe('InMemoryEventStore', () => {
     expect(await store.has(new ScalarIdentity('does not exists'))).toBeFalsy();
   });
 
+  it('Can create from array', async () => {
+    const id = new ScalarIdentity('38459347598437');
+    const event1 = new DomainMessage(id, 0, new DomainEvent(), date);
+    const event2 = new DomainMessage(id, 1, new DomainEvent(), date);
+    const event3 = new DomainMessage(id, 2, new DomainEvent(), date);
+    const event4 = new DomainMessage(id, 3, new DomainEvent(), date);
+
+    const store = InMemoryEventStore.fromArray([event1, event2, event3, event4]);
+
+    expect(await store.load(id).pipe(toArray()).toPromise()).toEqual([event1, event2, event3, event4]);
+  });
+
 });

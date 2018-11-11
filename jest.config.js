@@ -7,7 +7,9 @@ module.exports = {
         "!**/*test.{ts}",
         "!**/*.d.{ts}",
         "!**/build",
-        "!**/.stryker-tmp"
+        "!**/.stryker-tmp",
+        "!**/(TypeOrm|FileEventStore)/*",
+        "!**/FileEventStore.ts"
     ],
     coverageReporters: [
         "json-summary",

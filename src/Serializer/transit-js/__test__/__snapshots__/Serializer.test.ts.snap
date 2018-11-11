@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Serializer Can serialize a random class 1`] = `"[\\"~#TestClass\\",[\\"^ \\",\\"foo\\",\\"d\\",\\"t\\",2,\\"name\\",55,\\"date\\",\\"~m1518770045540\\"]]"`;
+
+exports[`Serializer Can serialize normal javascript objects 1`] = `"[\\"^ \\",\\"date\\",\\"~m1518770045540\\",\\"arrays\\",[1,2,3],\\"objects\\",[\\"^ \\",\\"test\\",2]]"`;
+
+exports[`Serializer Can serialize records 1`] = `"[\\"~#iR\\",[\\"^ \\",\\"n\\",\\"test\\",\\"v\\",[\\"^ \\",\\"name\\",\\"bar\\"]]]"`;
