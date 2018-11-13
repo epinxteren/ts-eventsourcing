@@ -4,6 +4,7 @@ import { InMemoryRepository } from '../InMemoryRepository';
 import { ReadModel } from '../ReadModel';
 import { Identity } from '../../ValueObject/Identity';
 import { ModelNotFoundException } from '../Error/ModelNotFoundException';
+import { toArray } from 'rxjs/operators';
 
 class TestReadModel implements ReadModel {
 
@@ -19,14 +20,14 @@ class TestReadModel implements ReadModel {
 describe('InMemoryRepository', () => {
   it('Starts empty', async () => {
     const repository = new InMemoryRepository<TestReadModel>();
-    const models = await repository.findAll();
+    const models = await repository.findAll().pipe(toArray()).toPromise();
     expect(models).toEqual([]);
   });
   it('Add single read model', async () => {
     const repository = new InMemoryRepository<TestReadModel>();
     const model = new TestReadModel(new ScalarIdentity('1'), 'test');
     await repository.save(model);
-    const models = await repository.findAll();
+    const models = await repository.findAll().pipe(toArray()).toPromise();
     expect(models[0]).toBe(model);
   });
   it('Can add multiple models', async () => {
@@ -37,7 +38,7 @@ describe('InMemoryRepository', () => {
     await repository.save(model2);
     const model3 = new TestReadModel(new ScalarIdentity('3'), 'test 3');
     await repository.save(model3);
-    const models = await repository.findAll();
+    const models = await repository.findAll().pipe(toArray()).toPromise();
     expect(models).toEqual([model1, model2, model3]);
   });
   it('Can delete models', async () => {
@@ -49,7 +50,7 @@ describe('InMemoryRepository', () => {
     const model3 = new TestReadModel(new ScalarIdentity('3'), 'test 3');
     await repository.save(model3);
     await repository.remove(new ScalarIdentity('2'));
-    const models = await repository.findAll();
+    const models = await repository.findAll().pipe(toArray()).toPromise();
     expect(models).toEqual([model1, model3]);
   });
   it('Can find by keys models', async () => {
@@ -62,13 +63,13 @@ describe('InMemoryRepository', () => {
     const model3 = new TestReadModel(identity3, 'test');
     await repository.save(model3);
 
-    let models = await repository.findBy({ name: 'test' });
+    let models = await repository.findBy({ name: 'test' }).pipe(toArray()).toPromise();
     expect(models).toEqual([model2, model3]);
 
-    models = await repository.findBy({ name: 'test', id: identity3 });
+    models = await repository.findBy({ name: 'test', id: identity3 }).pipe(toArray()).toPromise();
     expect(models).toEqual([model3]);
 
-    models = await repository.findBy({ name: 'test 1', id: identity3 });
+    models = await repository.findBy({ name: 'test 1', id: identity3 }).pipe(toArray()).toPromise();
     expect(models).toEqual([]);
   });
 

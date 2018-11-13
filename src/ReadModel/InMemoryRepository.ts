@@ -6,6 +6,8 @@ import { ReadModel } from './ReadModel';
 import { Repository } from './Repository';
 import { Identity } from '../ValueObject/Identity';
 import { ModelNotFoundException } from './Error/ModelNotFoundException';
+import { Observable, of } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 export class InMemoryRepository<Model extends ReadModel<Id>, Id extends Identity = Identity> implements Repository<Model, Id> {
   protected models: { [identity: string]: Model } = {};
@@ -35,20 +37,19 @@ export class InMemoryRepository<Model extends ReadModel<Id>, Id extends Identity
     return this.models[idString];
   }
 
-  public async findBy(fields: { [key: string]: any }): Promise<Model[]> {
-    const models = await this.findAll();
-    return models.filter(model => {
+  public findBy(fields: { [key: string]: any }): Observable<Model> {
+    return this.findAll().pipe(filter((model) => {
       for (const key in fields) {
         if (fields.hasOwnProperty(key) && (model as any)[key] !== fields[key]) {
           return false;
         }
       }
       return true;
-    });
+    }));
   }
 
-  public findAll(): Promise<Model[]> {
-    return Promise.resolve(Object.keys(this.models).map(id => {
+  public findAll(): Observable<Model> {
+    return of(...Object.keys(this.models).map(id => {
       return this.models[id];
     }));
   }

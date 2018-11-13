@@ -18,7 +18,7 @@ export class AggregateTestContextCollection {
 
   }
 
-  public getByConstructor<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>): AggregateTestContext<any> {
+  public getByConstructor<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T, any>): AggregateTestContext<any> {
     const name: string = ClassUtil.nameOffConstructor(aggregateConstructor);
     if (!this.aggregateMap[name]) {
       this.aggregateMap[name] = new AggregateTestContext(aggregateConstructor, this.testBench);

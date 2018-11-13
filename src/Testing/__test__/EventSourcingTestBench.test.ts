@@ -653,41 +653,12 @@ describe('Should handle rejections', () => {
 
 });
 
-describe('Should give a warning for aggregate repository without findAll function', () => {
-  class TestReadModel implements ReadModel {
-    public getId(): Identity {
-      throw new Error('not implemented');
-    }
-  }
-
-  class TestRepository implements Repository<TestReadModel> {
-    public find(_id: Identity): Promise<TestReadModel | null> {
-      throw new Error('not implemented');
-    }
-
-    public get(_id: Identity): Promise<TestReadModel> {
-      throw new Error('not implemented');
-    }
-
-    public has(_id: Identity): Promise<boolean> {
-      throw new Error('not implemented');
-    }
-
-    public remove(_id: Identity): Promise<void> {
-      throw new Error('not implemented');
-    }
-
-    public save(_model: TestReadModel): Promise<void> {
-      throw new Error('not implemented');
-    }
-  }
-
-  return expect(
-    EventSourcingTestBench
-      .create()
-      .givenReadModelRepository(TestReadModel, () => {
-        return new TestRepository();
-      })
-      .thenShouldMatchSnapshot(),
-  ).rejects.toThrowError('Missing find all function on TestRepository');
+it('Can give own string reference for model repository', async () => {
+  const testRepository = jest.fn();
+  const testBench: EventSourcingTestBench = await EventSourcingTestBench
+    .create()
+    .givenReadModelRepository('MyReference', () => {
+      return testRepository as any;
+    });
+  expect(testBench.getReadModelRepository('MyReference')).toBe(testRepository);
 });

@@ -1,14 +1,21 @@
 import { ClassUtil } from '../../ClassUtil';
 import { ReadModelTestContext } from './ReadModelTestContext';
-import { TestError } from '../Error/TestError';
 import { ReadModel, ReadModelConstructor } from '../../ReadModel/ReadModel';
 import { Repository } from '../../ReadModel/Repository';
+import { toArray } from 'rxjs/operators';
 
 export class ReadModelTestContextCollection {
   public readonly map: { [className: string]: ReadModelTestContext<any> } = {};
 
   public getByInstance<T extends ReadModel>(model: T): ReadModelTestContext<T> {
     const name: string = ClassUtil.nameOffInstance(model);
+    if (!this.map[name]) {
+      this.map[name] = new ReadModelTestContext();
+    }
+    return this.map[name];
+  }
+
+  public getByName<T extends ReadModel>(name: string): ReadModelTestContext<T> {
     if (!this.map[name]) {
       this.map[name] = new ReadModelTestContext();
     }
@@ -31,11 +38,7 @@ export class ReadModelTestContextCollection {
         continue;
       }
       const repository: Repository<any> = this.map[className].getRepository();
-      const findAll = (repository as any).findAll;
-      if (typeof findAll === 'undefined') {
-        throw TestError.missingFindAllFunction(repository);
-      }
-      result[className] = await (repository as any).findAll();
+      result[className] = await repository.findAll().pipe(toArray()).toPromise();
     }
     return result;
   }

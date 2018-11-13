@@ -215,9 +215,9 @@ export class EventSourcingTestBench {
    *
    * Keep in mind that these event will not be put on the event bus, use {@see whenEventsHappened} for this.
    */
-  public given<T extends EventSourcedAggregateRoot>(
-    id: Identity,
-    aggregateClass: EventSourcedAggregateRootConstructor<T>,
+  public given<T extends EventSourcedAggregateRoot<Id>, Id extends Identity>(
+    id: Id,
+    aggregateClass: EventSourcedAggregateRootConstructor<T, Id>,
     events: DomainEvent[]) {
     return this.addTask(async () => {
       const context = this.aggregates.getByConstructor(aggregateClass);
@@ -272,7 +272,7 @@ export class EventSourcingTestBench {
    *
    */
   public givenAggregateRepository<T extends EventSourcedAggregateRoot>(
-    aggregateConstructor: EventSourcedAggregateRootConstructor<T>,
+    aggregateConstructor: EventSourcedAggregateRootConstructor<T, any>,
     repositoryOrFactory: ValueOrFactory<EventSourcingRepositoryInterface<T>, this> | EventSourcingRepositoryConstructor<T>) {
     return this.addTask(async () => {
       const Constructor: any = (repositoryOrFactory as any);
@@ -308,10 +308,10 @@ export class EventSourcingTestBench {
    *   .givenReadModelRepository(TestReadModel, new TestRepository());
    */
   public givenReadModelRepository<T extends ReadModel>(
-    modelConstructor: ReadModelConstructor<T>,
+    reference: ReadModelConstructor<T> | string,
     repositoryOrFactory: ValueOrFactory<Repository<T>, this>) {
     return this.addTask(async () => {
-      const modelTestContext = this.getReadModelTestContext<T>(modelConstructor);
+      const modelTestContext = this.getReadModelTestContext<T>(reference);
       const repository = this.returnValue(repositoryOrFactory as any);
       modelTestContext.setRepository(repository);
     });
@@ -633,31 +633,34 @@ export class EventSourcingTestBench {
     });
   }
 
-  public getAggregateRepository<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>) {
+  public getAggregateRepository<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T, any>) {
     return this.getAggregateTestContext<T>(aggregateConstructor).getRepository();
   }
 
-  public getEventStore<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>) {
+  public getEventStore<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T, any>) {
     return this.getAggregateTestContext<T>(aggregateConstructor).getEventStore();
   }
 
-  public getEventStreamDecorator<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>) {
+  public getEventStreamDecorator<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T, any>) {
     return this.getAggregateTestContext<T>(aggregateConstructor).getEventStreamDecorator();
   }
 
-  public getAggregateFactory<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>) {
+  public getAggregateFactory<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T, any>) {
     return this.getAggregateTestContext<T>(aggregateConstructor).getAggregateFactory();
   }
 
-  public getReadModelRepository<T extends ReadModel>(readModelConstructor: ReadModelConstructor<T>): Repository<T> {
-    return this.getReadModelTestContext<T>(readModelConstructor).getRepository();
+  public getReadModelRepository<T extends ReadModel>(reference: ReadModelConstructor<T> | string): Repository<T> {
+    return this.getReadModelTestContext<T>(reference).getRepository();
   }
 
-  public getReadModelTestContext<T extends ReadModel>(readModelConstructor: ReadModelConstructor<T>): ReadModelTestContext<T> {
-    return this.models.getByConstructor(readModelConstructor);
+  public getReadModelTestContext<T extends ReadModel>(reference: ReadModelConstructor<T> | string): ReadModelTestContext<T> {
+    if (typeof reference === 'string') {
+      return this.models.getByName(reference);
+    }
+    return this.models.getByConstructor(reference);
   }
 
-  public getAggregateTestContext<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T>) {
+  public getAggregateTestContext<T extends EventSourcedAggregateRoot>(aggregateConstructor: EventSourcedAggregateRootConstructor<T, any>) {
     return this.aggregates.getByConstructor<T>(aggregateConstructor);
   }
 
