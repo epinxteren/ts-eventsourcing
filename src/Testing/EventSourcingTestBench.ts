@@ -362,6 +362,7 @@ export class EventSourcingTestBench {
       await this.thenWaitUntilProcessed();
       const handleTask = this.handleTask;
       this.handleTask = async (task: TestTask) => {
+        this.handleTask = handleTask;
 
         // Jest only support 'toThrowError' for none promises.
         // Catch the error first, and throw it normally.
@@ -370,10 +371,6 @@ export class EventSourcingTestBench {
           await handleTask.call(this, task);
 
           // Handle all tasks created by the previous task.
-          await this.toPromise();
-
-          // Then wait for all pending events on command bus.
-          await this.thenWaitUntilProcessed();
           await this.toPromise();
         } catch (e) {
           actualError = e;
@@ -385,7 +382,6 @@ export class EventSourcingTestBench {
             throw actualError;
           }
         }).toThrowError(error);
-        this.handleTask = handleTask;
       };
     });
   }
@@ -699,11 +695,7 @@ export class EventSourcingTestBench {
 
   public thenWaitUntilProcessed() {
     return this.addTask(async () => {
-      await this.asyncBus.untilIdle();
-      // Throw first error, generated on the bus.
-      if (this.errors.length) {
-        throw this.errors.shift();
-      }
+      await this._thenWaitUntilProcessed();
     });
   }
 
@@ -738,6 +730,9 @@ export class EventSourcingTestBench {
       const description = task.description;
       this.getLogger().info(description);
       await this.handleTask(task);
+
+      await this._thenWaitUntilProcessed();
+
       // Handle all tasks created by the previous task.
       await this.toPromise();
     }
@@ -800,6 +795,18 @@ export class EventSourcingTestBench {
   }
 
   /* tslint:enable:no-debugger */
+
+  /**
+   * For internal use, to prevent curlier loop inside the toPromise function.
+   * @private
+   */
+  protected async _thenWaitUntilProcessed() {
+    await this.asyncBus.untilIdle();
+    // Throw first error, generated on the bus.
+    if (this.errors.length) {
+      throw this.errors.shift();
+    }
+  }
 
   private addPending(pending: TestTask): this & Promise<this> {
     this.tasks.push(pending);

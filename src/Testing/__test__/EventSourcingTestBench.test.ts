@@ -222,7 +222,7 @@ describe('givenQueryHandler should register queryHandler to the query bus', () =
     const spy = jest.spyOn(testBench.queryBus, 'subscribe');
     await testBench
       .givenQueryHandler(
-      TestQueryHandlerWithRepository, [ProductAggregate, UserAggregate, UserReadModel]);
+        TestQueryHandlerWithRepository, [ProductAggregate, UserAggregate, UserReadModel]);
     expect(spy.mock.calls[0][0]).toBeInstanceOf(TestQueryHandlerWithRepository);
     expect(spyConstructor).toBeCalledWith(
       testBench.getAggregateTestContext(ProductAggregate).getRepository(),
@@ -743,6 +743,7 @@ describe('Logging', () => {
 
     class MyRepository extends InMemoryRepository<UserReadModel> {
     }
+
     const testBench = new EventSourcingTestBench();
     await testBench
       .givenTestLogger(new TestLogger())
@@ -776,4 +777,15 @@ describe('Logging', () => {
     });
   });
 
+});
+
+it('Should throw error, when there is no error ', (done) => {
+  EventSourcingTestBench
+    .create()
+    .throws('This should not be fine')
+    .whenCommands([])
+    .toPromise()
+    .catch(() => {
+      done();
+    });
 });
