@@ -20,6 +20,9 @@ import { toArray } from 'rxjs/operators';
 import { QueryHandler } from '../../QueryHandling/QueryHandler';
 import { Query } from '../../QueryHandling/Query';
 import { HandleQuery } from '../../QueryHandling/HandleQuery';
+import { InMemoryRepository } from '../../ReadModel/InMemoryRepository';
+import { AbstractLogger } from '../../Logger/AbstractLogger';
+import { LogLevel } from '../../Logger/LoggerInterface';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
 
@@ -217,7 +220,8 @@ describe('givenQueryHandler should register queryHandler to the query bus', () =
 
     const testBench = new EventSourcingTestBench();
     const spy = jest.spyOn(testBench.queryBus, 'subscribe');
-    await testBench.givenQueryHandler(
+    await testBench
+      .givenQueryHandler(
       TestQueryHandlerWithRepository, [ProductAggregate, UserAggregate, UserReadModel]);
     expect(spy.mock.calls[0][0]).toBeInstanceOf(TestQueryHandlerWithRepository);
     expect(spyConstructor).toBeCalledWith(
@@ -661,4 +665,115 @@ it('Can give own string reference for model repository', async () => {
       return testRepository as any;
     });
   expect(testBench.getReadModelRepository('MyReference')).toBe(testRepository);
+});
+
+describe('Logging', () => {
+
+  let log = jest.fn();
+
+  class TestLogger extends AbstractLogger {
+    public log(_type: LogLevel, ...message: any[]): void {
+      log(message.join(' '));
+    }
+  }
+
+  beforeEach(() => {
+    log = jest.fn();
+  });
+
+  it('Can enabled', async () => {
+    const logger = {
+      info: jest.fn(),
+    };
+    const testBench = await EventSourcingTestBench
+      .create()
+      .givenTestLogger(logger as any);
+    expect(testBench.getLogger()).toEqual(logger);
+  });
+
+  it('Logs messages', async () => {
+    const testRepository = jest.fn();
+    await EventSourcingTestBench
+      .create()
+      .givenTestLogger(new TestLogger())
+      .givenReadModelRepository('MyReference', () => {
+        return testRepository as any;
+      })
+      .thenAssert(async (testBench) => {
+        await testBench.thenModelsShouldMatch([]);
+      });
+    const logs = log.mock.calls.map((args) => args[0]);
+    expect(logs).toMatchSnapshot();
+  });
+
+  it('The repository class arguments should be seen in the logs', async () => {
+    class ProductAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserAggregate extends EventSourcedAggregateRoot {
+
+    }
+
+    class UserReadModel implements ReadModel {
+      public getId(): Identity {
+        throw new Error('not implemented');
+      }
+    }
+
+    class TestQuery {
+
+    }
+
+    class TestQueryHandlerWithRepository implements QueryHandler {
+
+      constructor(_productRepository: EventSourcingRepositoryInterface<ProductAggregate>,
+                  _userRepository: EventSourcingRepositoryInterface<UserAggregate>,
+                  _userReadModellRepository: Repository<UserReadModel>,
+                  _myRepository: MyRepository) {
+        // Does nothing.
+      }
+
+      @HandleQuery
+      public handle(_query: TestQuery) {
+        // Does nothing.
+      }
+
+    }
+
+    class MyRepository extends InMemoryRepository<UserReadModel> {
+    }
+    const testBench = new EventSourcingTestBench();
+    await testBench
+      .givenTestLogger(new TestLogger())
+      .givenReadModelRepository('MyRepository', new MyRepository())
+      .givenQueryHandler(
+        TestQueryHandlerWithRepository, [ProductAggregate, UserAggregate, UserReadModel, 'MyRepository']);
+    const logs = log.mock.calls.map((args) => args[0]);
+    expect(logs).toMatchSnapshot();
+  });
+
+  describe('defaults', () => {
+    const write = process.stdout.write;
+    afterEach(() => {
+      process.stdout.write = write;
+    });
+    it('Default logs to process', async () => {
+      const testRepository = jest.fn();
+      const mock = jest.fn();
+      process.stdout.write = mock;
+      await EventSourcingTestBench
+        .create()
+        .givenTestLogger()
+        .givenReadModelRepository('MyReference', () => {
+          return testRepository as any;
+        })
+        .thenAssert(async (testBench) => {
+          await testBench.thenModelsShouldMatch([]);
+        });
+      const logs = mock.mock.calls.map((args) => args[0]);
+      expect(logs).toMatchSnapshot();
+    });
+  });
+
 });

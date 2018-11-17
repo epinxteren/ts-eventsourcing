@@ -67,7 +67,9 @@
     "typescript": "^3.0.1"
   },
   "dependencies": {
+    "@types/extsprintf": "^1.4.0",
     "@types/uuid": "^3.4.3",
+    "error-stack-parser": "^2.0.2",
     "immutable": "^4.0.0-rc.12",
     "moment": "^2.22.2",
     "reflect-metadata": "^0.1.12",

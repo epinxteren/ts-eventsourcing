@@ -33,13 +33,24 @@ import { QueryHandler, QueryHandlerConstructor } from '../QueryHandling/QueryHan
 import { QueryBus } from '../QueryHandling/QueryBus';
 import { SimpleQueryBus } from '../QueryHandling/SimpleQueryBus';
 import { Query } from '../QueryHandling/Query';
+import { LoggerInterface } from '../Logger/LoggerInterface';
+import { ProcessLogger } from '../Logger/ProcessLogger';
+import * as ErrorStackParser from 'error-stack-parser';
+import { StackFrame } from 'error-stack-parser';
+import * as extsprintf from 'extsprintf';
+import { ClassUtil } from '../ClassUtil';
+import { NullLogger } from '../Logger/NullLogger';
+import { PrefixDecoratorLogger } from '../Logger/PrefixDecoratorLogger';
 
 export interface TestTask {
   callback: () => Promise<any>;
   description: string;
+  stack: StackFrame[];
 }
 
 export type ValueOrFactory<T, TB> = T | ((testBench: TB) => T);
+
+export type RepositoryReference = EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any> | string;
 
 /**
  * For testing event sourcing related logic.
@@ -69,6 +80,8 @@ export class EventSourcingTestBench {
   protected currentTime: Date;
   protected tasks: TestTask[] = [];
   protected errors: Array<unknown> = [];
+  protected indent: number = 0;
+  private logger: LoggerInterface;
 
   constructor(currentTime: Date | string = EventSourcingTestBench.defaultCurrentTime) {
     this.currentTime = this.parseDateTime(currentTime);
@@ -79,6 +92,7 @@ export class EventSourcingTestBench {
     this.eventBus = this.recordBus;
     this.aggregates = new AggregateTestContextCollection(this);
     this.domainMessageFactory = new DomainMessageTestFactory(this);
+    this.logger = new NullLogger();
   }
 
   /**
@@ -139,11 +153,11 @@ export class EventSourcingTestBench {
   public givenQueryHandler(createOrHandler: ValueOrFactory<QueryHandler, this>): this;
   public givenQueryHandler(
     constructor: QueryHandlerConstructor,
-    classes?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+    classes?: RepositoryReference[],
   ): this;
   public givenQueryHandler(
     createOrConstructor: ValueOrFactory<QueryHandler, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => QueryHandler),
-    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []) {
+    classes: RepositoryReference[] = []) {
     return this.addTask(async () => {
       if (classes.length !== 0 && typeof createOrConstructor === 'function') {
         const handler = this.createClassByRepositoryArguments(createOrConstructor as any, classes);
@@ -176,11 +190,11 @@ export class EventSourcingTestBench {
   public givenEventListener(createOrEventListener: ValueOrFactory<EventListener, this>): this;
   public givenEventListener(
     constructor: (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => EventListener) | EventListenerConstructor,
-    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+    classes: RepositoryReference[],
   ): this;
   public givenEventListener(
     createOrEventListener: ValueOrFactory<EventListener, this> | EventListenerConstructor,
-    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []): this {
+    classes: RepositoryReference[] = []): this {
     return this.addTask(async () => {
       if (classes.length !== 0 && typeof createOrEventListener === 'function') {
         const handler = this.createClassByRepositoryArguments(createOrEventListener as any, classes);
@@ -318,6 +332,17 @@ export class EventSourcingTestBench {
   }
 
   /**
+   * Log all test commands to the console, for debugging purposes.
+   *
+   * @param logger
+   */
+  public givenTestLogger(logger: LoggerInterface = new ProcessLogger(process)) {
+    return this.addTask(async () => {
+      this.logger = logger;
+    });
+  }
+
+  /**
    * Can be added before all function to verify the next task throws an error.
    *
    *  await testBench
@@ -336,13 +361,13 @@ export class EventSourcingTestBench {
     return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
       const handleTask = this.handleTask;
-      this.handleTask = async (_taskDescription: string, callback: () => Promise<void>) => {
+      this.handleTask = async (task: TestTask) => {
 
         // Jest only support 'toThrowError' for none promises.
         // Catch the error first, and throw it normally.
         let actualError: any = null;
         try {
-          await handleTask.call(this, _taskDescription, callback);
+          await handleTask.call(this, task);
 
           // Handle all tasks created by the previous task.
           await this.toPromise();
@@ -664,6 +689,14 @@ export class EventSourcingTestBench {
     return this.aggregates.getByConstructor<T>(aggregateConstructor);
   }
 
+  public getLogger(indent: number = 0): LoggerInterface {
+    const totalIndent = this.indent + indent;
+    if (totalIndent !== 0) {
+      return PrefixDecoratorLogger.with(this.logger,  extsprintf.sprintf(`%${totalIndent * 3}s`, ''));
+    }
+    return this.logger;
+  }
+
   public thenWaitUntilProcessed() {
     return this.addTask(async () => {
       await this.asyncBus.untilIdle();
@@ -702,8 +735,9 @@ export class EventSourcingTestBench {
     this.tasks = [];
     for (const task of tasks) {
       // The task name for easy referencing.
-      const name = task.description;
-      await this.handleTask(name, task.callback);
+      const description = task.description;
+      this.getLogger().info(description);
+      await this.handleTask(task);
       // Handle all tasks created by the previous task.
       await this.toPromise();
     }
@@ -721,22 +755,48 @@ export class EventSourcingTestBench {
     return typeof valueOrFactory === 'function' ? valueOrFactory(this) : valueOrFactory;
   }
 
-  protected addTask(callback: () => Promise<void>): this {
-    const stack = new Error().stack;
+  protected addTask(callback: () => Promise<void>, ignore: number = 1): this {
+    const stack = ErrorStackParser.parse(new Error());
+    const realStack: StackFrame[] = stack.slice(ignore);
+
+    const testFunction: StackFrame = realStack[0];
+    const userFunction: StackFrame = realStack[1];
+
+    const directory = process.cwd();
     /* istanbul ignore next */
-    const caller = stack ? stack.split('\n')[2].trim() : 'unknown';
-    return this.addPending({ description: caller, callback });
+    const fileName = userFunction.fileName || '';
+    const strippedPath = fileName.replace(`${directory}/`, '');
+    /* istanbul ignore next */
+    const functionName = testFunction.functionName || '';
+    const name = ClassUtil.nameOffInstance(this);
+    this.indent = realStack.reduce(
+      (prev, trace) => {
+        if (trace.functionName && trace.functionName.indexOf('.addTask') >= 0) {
+          return prev + 1;
+        }
+        return prev;
+      },
+      0,
+    );
+
+    const description = extsprintf.sprintf(
+      '%-60s %s',
+      `${strippedPath}:${userFunction.lineNumber}:${userFunction.columnNumber}`,
+      functionName.replace(`${name}.`, ''),
+    );
+    /* istanbul ignore next */
+    return this.addPending({ stack, callback, description });
   }
 
   /* tslint:disable:no-debugger */
-  protected async handleTask(_taskDescription: string, callback: () => Promise<void>) {
+  protected async handleTask(task: TestTask) {
     /* istanbul ignore next */
     if (this.breakpoint) {
       this.breakpoint = false;
       // Step into to see what the next task is going to do.
       debugger;
     }
-    await callback.call(this);
+    await task.callback.call(this);
   }
 
   /* tslint:enable:no-debugger */
@@ -762,12 +822,18 @@ export class EventSourcingTestBench {
 
   private createClassByRepositoryArguments(
     constructor: CommandHandlerConstructor | EventListenerConstructor,
-    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>) {
-    const repositories = classes.map((classConstruct) => {
-      if (isEventSourcedAggregateRootConstructor(classConstruct)) {
-        return this.getAggregateTestContext(classConstruct).getRepository();
+    references: RepositoryReference[]) {
+    const repositories = references.map((reference) => {
+      if (isEventSourcedAggregateRootConstructor(reference)) {
+        return this.getAggregateTestContext(reference).getRepository();
       }
-      return this.getReadModelTestContext(classConstruct).getRepository();
+      return this.getReadModelTestContext(reference).getRepository();
+    });
+    this.getLogger(1).info(`Created class ${ClassUtil.nameOffConstructor(constructor)} with arguments:`);
+    repositories.map((repository, index) => {
+      const reference = references[index];
+      const referenceTitle = typeof reference === 'string' ? reference : ClassUtil.nameOffConstructor(reference);
+      this.getLogger(2).info(extsprintf.sprintf(`%20s --> ${ClassUtil.nameOffInstance(repository)}`, referenceTitle));
     });
     return new (constructor as any)(...repositories);
   }

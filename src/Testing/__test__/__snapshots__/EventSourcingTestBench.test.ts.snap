@@ -1,5 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Logging Logs messages 1`] = `
+Array [
+  "src/Testing/__test__/EventSourcingTestBench.test.ts:699:8    givenReadModelRepository",
+  "src/Testing/__test__/EventSourcingTestBench.test.ts:702:8    thenAssert",
+  "    src/Testing/EventSourcingTestBench.ts:656:18                 thenWaitUntilProcessed",
+  "    src/Testing/__test__/EventSourcingTestBench.test.ts:703:25   thenModelsShouldMatch",
+  "    src/Testing/EventSourcingTestBench.ts:537:18                 thenWaitUntilProcessed",
+]
+`;
+
+exports[`Logging The repository class arguments should be seen in the logs 1`] = `
+Array [
+  "src/Testing/__test__/EventSourcingTestBench.test.ts:749:8    givenReadModelRepository",
+  "src/Testing/__test__/EventSourcingTestBench.test.ts:750:8    givenQueryHandler",
+  "    Created class TestQueryHandlerWithRepository with arguments:",
+  "           ProductAggregate --> EventSourcingRepository",
+  "              UserAggregate --> EventSourcingRepository",
+  "              UserReadModel --> InMemoryRepository",
+  "               MyRepository --> MyRepository",
+]
+`;
+
+exports[`Logging defaults Default logs to process 1`] = `
+Array [
+  "src/Testing/__test__/EventSourcingTestBench.test.ts:768:10   givenReadModelRepository 
+",
+  "src/Testing/__test__/EventSourcingTestBench.test.ts:771:10   thenAssert 
+",
+  "    src/Testing/EventSourcingTestBench.ts:656:18                 thenWaitUntilProcessed 
+",
+  "    src/Testing/__test__/EventSourcingTestBench.test.ts:772:27   thenModelsShouldMatch 
+",
+  "    src/Testing/EventSourcingTestBench.ts:537:18                 thenWaitUntilProcessed 
+",
+]
+`;
+
 exports[`givenCommandHandler should be able to give own repository by default constructor interface 1`] = `
 TestRepository {
   "aggregateFactory": SimpleEventSourcedAggregateFactory {
