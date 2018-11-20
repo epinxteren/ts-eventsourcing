@@ -339,7 +339,7 @@ describe('Given domain events should be assigned to corresponding aggregate stor
     const id = UuidIdentity.create();
 
     await testBench
-      .given(id, TestAggregate, [
+      .givenEvents(id, TestAggregate, [
         new TestEvent(),
         new TestEvent2(),
       ]);
@@ -361,11 +361,11 @@ describe('Given domain events should be assigned to corresponding aggregate stor
     const id2 = UuidIdentity.create();
 
     await testBench
-      .given(id1, TestAggregate, [
+      .givenEvents(id1, TestAggregate, [
         new TestEvent(),
         new TestEvent2(),
       ])
-      .given(id2, TestAggregate, [
+      .givenEvents(id2, TestAggregate, [
         new TestEvent(),
         new TestEvent2(),
         new TestEvent2(),
@@ -398,10 +398,10 @@ describe('Given domain events should be assigned to corresponding aggregate stor
     const id2 = UuidIdentity.create();
 
     await testBench
-      .given(id1, TestAggregate, [
+      .givenEvents(id1, TestAggregate, [
         new TestEvent(),
       ])
-      .given(id2, TestAggregate2, [
+      .givenEvents(id2, TestAggregate2, [
         new TestEvent(),
       ]);
 
@@ -608,7 +608,7 @@ it('Can be extended', async () => {
     .create()
     .givenTheFollowingTest();
 
-  await testBench.given(UuidIdentity.create(), TestAggregate, [])
+  await testBench.givenEvents(UuidIdentity.create(), TestAggregate, [])
                  .givenTheFollowingTest();
 
   expect(spy).toBeCalledWith('MyEventSourcingTestBench');
@@ -788,4 +788,33 @@ it('Should throw error, when there is no error ', (done) => {
     .catch(() => {
       done();
     });
+});
+
+describe('Support for manual tasks', () => {
+  it('given', async () => {
+    const spy = jest.fn();
+    const tb = await EventSourcingTestBench
+      .create()
+      .given(spy);
+
+    expect(spy).toBeCalledWith(tb);
+  });
+
+  it('when', async () => {
+    const spy = jest.fn();
+    const tb = await EventSourcingTestBench
+      .create()
+      .when(spy);
+
+    expect(spy).toBeCalledWith(tb);
+  });
+
+  it('thenAssert', async () => {
+    const spy = jest.fn();
+    const tb = await EventSourcingTestBench
+      .create()
+      .thenAssert(spy);
+
+    expect(spy).toBeCalledWith(tb);
+  });
 });

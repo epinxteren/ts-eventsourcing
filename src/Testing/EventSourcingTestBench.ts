@@ -229,7 +229,7 @@ export class EventSourcingTestBench {
    *
    * Keep in mind that these event will not be put on the event bus, use {@see whenEventsHappened} for this.
    */
-  public given<T extends EventSourcedAggregateRoot<Id>, Id extends Identity>(
+  public givenEvents<T extends EventSourcedAggregateRoot<Id>, Id extends Identity>(
     id: Id,
     aggregateClass: EventSourcedAggregateRootConstructor<T, Id>,
     events: DomainEvent[]) {
@@ -343,6 +343,13 @@ export class EventSourcingTestBench {
   }
 
   /**
+   * Executes a callback function in the flow of the test.
+   */
+  public given(callback: (testBench: this) => Promise<void> | void): this {
+    return this.addTask(() => Promise.resolve(callback(this)));
+  }
+
+  /**
    * Can be added before all function to verify the next task throws an error.
    *
    *  await testBench
@@ -452,6 +459,13 @@ export class EventSourcingTestBench {
       const messages = this.domainMessageFactory.createDomainMessages(id, events);
       this.whenDomainMessagesHappened(messages);
     });
+  }
+
+  /**
+   * Executes a callback function in the flow of the test.
+   */
+  public when(callback: (testBench: this) => Promise<void> | void): this {
+    return this.addTask(() => Promise.resolve(callback(this)));
   }
 
   /**

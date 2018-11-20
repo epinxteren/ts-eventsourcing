@@ -4,9 +4,9 @@ exports[`Logging Logs messages 1`] = `
 Array [
   "src/Testing/__test__/EventSourcingTestBench.test.ts:699:8    givenReadModelRepository",
   "src/Testing/__test__/EventSourcingTestBench.test.ts:702:8    thenAssert",
-  "    src/Testing/EventSourcingTestBench.ts:652:18                 thenWaitUntilProcessed",
+  "    src/Testing/EventSourcingTestBench.ts:666:18                 thenWaitUntilProcessed",
   "    src/Testing/__test__/EventSourcingTestBench.test.ts:703:25   thenModelsShouldMatch",
-  "    src/Testing/EventSourcingTestBench.ts:533:18                 thenWaitUntilProcessed",
+  "    src/Testing/EventSourcingTestBench.ts:547:18                 thenWaitUntilProcessed",
 ]
 `;
 
@@ -28,11 +28,11 @@ Array [
 ",
   "src/Testing/__test__/EventSourcingTestBench.test.ts:772:10   thenAssert 
 ",
-  "    src/Testing/EventSourcingTestBench.ts:652:18                 thenWaitUntilProcessed 
+  "    src/Testing/EventSourcingTestBench.ts:666:18                 thenWaitUntilProcessed 
 ",
   "    src/Testing/__test__/EventSourcingTestBench.test.ts:773:27   thenModelsShouldMatch 
 ",
-  "    src/Testing/EventSourcingTestBench.ts:533:18                 thenWaitUntilProcessed 
+  "    src/Testing/EventSourcingTestBench.ts:547:18                 thenWaitUntilProcessed 
 ",
 ]
 `;

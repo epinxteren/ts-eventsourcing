@@ -132,7 +132,7 @@ it('Should be able to give initial event', async () => {
     .givenCommandHandler((testBench: EventSourcingTestBench) => {
       return new OrderCommandHandler(testBench.getAggregateRepository(Order));
     })
-    .given(id, Order, [
+    .givenEvents(id, Order, [
       new ShipOrder(id),
     ])
     .whenCommands([new ShipOrder(id)])
@@ -203,10 +203,10 @@ it('Can have multiple instances of an aggregate', async () => {
     .givenCommandHandler((testBench: EventSourcingTestBench) => {
       return new OrderCommandHandler(testBench.getAggregateRepository(Order));
     })
-    .given(id1, Order, [
+    .givenEvents(id1, Order, [
       new OrderCreated(),
     ])
-    .given(id2, Order, [
+    .givenEvents(id2, Order, [
       new OrderCreated(),
     ])
     .whenCommands([new ShipOrder(id1)])
@@ -272,7 +272,7 @@ it('Can test different aggregates at the same time', async () => {
         testBench.getAggregateRepository(Customer),
       );
     })
-    .given(customerId1, Customer, [
+    .givenEvents(customerId1, Customer, [
       new CustomerCreatedAccount(),
     ])
     .whenCommands([new CustomerOrdered(customerId1, orderId1)])
@@ -289,7 +289,7 @@ it('Should able to handle aggregate errors', async () => {
     .givenCommandHandler((testBench: EventSourcingTestBench) => {
       return new OrderCommandHandler(testBench.getAggregateRepository(Order));
     })
-    .given(id, Order, [
+    .givenEvents(id, Order, [
       new OrderCreated(),
       new OrderShipped(),
     ])
