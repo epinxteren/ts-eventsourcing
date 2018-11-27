@@ -13,14 +13,14 @@ export class DomainMessageTestFactory {
 
   }
 
-  public createDomainMessage(id: Identity, event: DomainEvent) {
+  public createDomainMessage<Id extends Identity>(id: Id, event: DomainEvent): DomainMessage<DomainEvent, Id> {
     const playhead = this.getIncreasedPlayheadForIdentity(id);
     return new DomainMessage(id, playhead, event, this.testBench.getCurrentTime());
   }
 
-  public createDomainMessages(id: Identity, events: DomainEvent[]): DomainMessage[] {
+  public createDomainMessages<Id extends Identity>(id: Id, events: DomainEvent[]): Array<DomainMessage<DomainEvent, Id>> {
     return events.map((event) => {
-      return this.createDomainMessage(id, event);
+      return this.createDomainMessage<Id>(id, event);
     });
   }
 
