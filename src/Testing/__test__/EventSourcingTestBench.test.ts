@@ -23,6 +23,7 @@ import { HandleQuery } from '../../QueryHandling/HandleQuery';
 import { InMemoryRepository } from '../../ReadModel/InMemoryRepository';
 import { AbstractLogger } from '../../Logger/AbstractLogger';
 import { LogLevel } from '../../Logger/LoggerInterface';
+import { HandleDomainEvent } from '../../EventHandling/HandleDomainEvent';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
 
@@ -234,11 +235,19 @@ describe('givenQueryHandler should register queryHandler to the query bus', () =
 });
 
 describe('givenEventListener should be registered to the event bus', () => {
+  class TestDomainEvent implements DomainEvent {
+
+  }
+
   it('by value', async () => {
     const testBench = new EventSourcingTestBench();
 
     class TestEventListener implements EventListener {
 
+      @HandleDomainEvent(TestDomainEvent)
+      public handle() {
+        // Noop.
+      }
     }
 
     const spy = jest.spyOn(testBench.eventBus, 'subscribe');
@@ -251,7 +260,10 @@ describe('givenEventListener should be registered to the event bus', () => {
     const testBench = new EventSourcingTestBench();
 
     class TestEventListener implements EventListener {
-
+      @HandleDomainEvent(TestDomainEvent)
+      public handle() {
+        // Noop.
+      }
     }
 
     const spy = jest.spyOn(testBench.eventBus, 'subscribe');
@@ -283,6 +295,11 @@ describe('givenEventListener should be registered to the event bus', () => {
                   userRepository: EventSourcingRepositoryInterface<UserAggregate>,
                   userReadModellRepository: Repository<UserReadModel>) {
         spyConstructor(productRepository, userRepository, userReadModellRepository);
+      }
+
+      @HandleDomainEvent(TestDomainEvent)
+      public handle() {
+        // Noop.
       }
 
     }

@@ -116,11 +116,11 @@ export class EventSourcingTestBench {
   public givenCommandHandler(createOrHandler: ValueOrFactory<CommandHandler, this>): this;
   public givenCommandHandler(
     constructor: CommandHandlerConstructor,
-    classes?: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>>,
+    classes?: RepositoryReference[],
   ): this;
   public givenCommandHandler(
     createOrConstructor: ValueOrFactory<CommandHandler, this> | (new (...repositories: Array<EventSourcingRepositoryInterface<any>>) => CommandHandler),
-    classes: Array<EventSourcedAggregateRootConstructor<any> | ReadModelConstructor<any>> = []) {
+    classes: RepositoryReference[] = []) {
     return this.addTask(async () => {
       if (classes.length !== 0 && typeof createOrConstructor === 'function') {
         const handler = this.createClassByRepositoryArguments(createOrConstructor as any, classes);
@@ -622,13 +622,13 @@ export class EventSourcingTestBench {
    *  });
    */
   public thenAssertModel<T extends ReadModel>(
-    modelClass: ReadModelConstructor<T>,
+    reference: ReadModelConstructor<T> | string,
     id: Identity,
     matcher: (model: T, testBench: this) => Promise<void> | void,
   ): this {
     return this.addTask(async () => {
       await this.thenWaitUntilProcessed();
-      const repository = this.models.getByConstructor(modelClass).getRepository();
+      const repository = this.getReadModelTestContext(reference).getRepository();
       const model = await repository.get(id);
       await matcher(model, this);
     });
@@ -798,14 +798,14 @@ export class EventSourcingTestBench {
   }
 
   /* tslint:disable:no-debugger */
-  protected async handleTask(task: TestTask) {
+  protected handleTask(task: TestTask): Promise<any> {
     /* istanbul ignore next */
     if (this.breakpoint) {
       this.breakpoint = false;
-      // Step into to see what the next task is going to do.
+      // 'Step into' to see what the next task is going to do.
       debugger;
     }
-    await task.callback.call(this);
+    return Promise.resolve(task.callback.call(this));
   }
 
   /* tslint:enable:no-debugger */

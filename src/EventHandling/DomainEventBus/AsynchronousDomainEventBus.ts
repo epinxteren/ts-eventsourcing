@@ -10,6 +10,7 @@ import { DomainMessage } from '../../Domain/DomainMessage';
 import { Subscription, Subject, Observable, of, concat, EMPTY } from 'rxjs';
 import { concatMap, first } from 'rxjs/operators';
 import { fromPromise } from 'rxjs/internal-compatibility';
+import { IncorrectDomainEventHandlerError } from '../Error/IncorrectDomainEventHandlerError';
 
 /**
  * Always passes all events in sequence to the event corresponding handlers.
@@ -35,6 +36,9 @@ export class AsynchronousDomainEventBus implements DomainEventBus {
    */
   public subscribe(eventListener: EventListener): void {
     const handlers = allHandleDomainEventMetadata(eventListener);
+    if (handlers.length === 0) {
+      throw IncorrectDomainEventHandlerError.noHandlers(eventListener);
+    }
     handlers.forEach((metadata) => {
       const eventName: string = ClassUtil.nameOff(metadata.event);
       if (!this.eventHandlersMappedByEvent[eventName]) {
