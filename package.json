@@ -1,7 +1,7 @@
 {
   "name": "ts-eventsourcing",
   "private": false,
-  "version": "1.1.19",
+  "version": "1.2.0",
   "description": "Typed event sourcing framework",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -76,6 +76,8 @@
     "rxjs": "^6.3.3",
     "transit-immutable-js": "^0.7.0",
     "transit-js": "^0.8.861",
+    "triviality": "^0.4.3",
+    "triviality-logger": "^0.1.1",
     "tslib": "^1.9.3",
     "uuid": "^3.2.1",
     "uuid-validate": "^0.0.2"

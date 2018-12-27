@@ -16,6 +16,7 @@ import { IncorrectDomainEventHandlerError } from '../Error/IncorrectDomainEventH
  * Always passes all events in sequence to the event corresponding handlers.
  *
  * TODO: extract handler binding from this class.
+ * TODO: extract listener order from this class, can be async.
  */
 export class AsynchronousDomainEventBus implements DomainEventBus {
   private queue: DomainEventStream[] = [];
@@ -105,7 +106,13 @@ export class AsynchronousDomainEventBus implements DomainEventBus {
       if (!handlers) {
         return EMPTY;
       }
-      return fromPromise(Promise.all(handlers.map((handler) => handler(message))));
+      // TODO: This should not be default, at least it should be configurable.
+      async function handle(): Promise<void> {
+        for (const handler of handlers) {
+          await handler(message);
+        }
+      }
+      return fromPromise(handle());
     }));
     this.activeStreamSubscription = handledStream.subscribe(undefined, this.errorHandler, this.onComplete);
   }

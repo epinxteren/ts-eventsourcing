@@ -21,9 +21,9 @@ import { QueryHandler } from '../../QueryHandling/QueryHandler';
 import { Query } from '../../QueryHandling/Query';
 import { HandleQuery } from '../../QueryHandling/HandleQuery';
 import { InMemoryRepository } from '../../ReadModel/InMemoryRepository';
-import { AbstractLogger } from '../../Logger/AbstractLogger';
-import { LogLevel } from '../../Logger/LoggerInterface';
 import { HandleDomainEvent } from '../../EventHandling/HandleDomainEvent';
+import { AbstractLogLevelLogger } from 'triviality-logger/AbstractLogLevelLogger';
+import { LogLevel } from 'triviality-logger/LoggerInterface';
 
 describe('givenCommandHandler should register commandHandler to the command bus', () => {
 
@@ -688,7 +688,7 @@ describe('Logging', () => {
 
   let log = jest.fn();
 
-  class TestLogger extends AbstractLogger {
+  class TestLogger extends AbstractLogLevelLogger {
     public log(_type: LogLevel, ...message: any[]): void {
       log(message.join(' '));
     }

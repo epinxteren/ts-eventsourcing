@@ -30,6 +30,17 @@ it('Should ignore event with no handlers', async () => {
   await bus.untilIdle();
 });
 
+it('Throw error when there are no handler functions', async () => {
+  const bus = new AsynchronousDomainEventBus();
+  expect(() => {
+    class WithoutHandlers {
+
+    }
+
+    bus.subscribe(new WithoutHandlers());
+  }).toThrow();
+});
+
 it('Be able to register a single event handler', async () => {
 
   class UserHasBoughtACarEvent implements DomainEvent {

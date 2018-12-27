@@ -33,14 +33,14 @@ import { QueryHandler, QueryHandlerConstructor } from '../QueryHandling/QueryHan
 import { QueryBus } from '../QueryHandling/QueryBus';
 import { SimpleQueryBus } from '../QueryHandling/SimpleQueryBus';
 import { Query } from '../QueryHandling/Query';
-import { LoggerInterface } from '../Logger/LoggerInterface';
-import { ProcessLogger } from '../Logger/ProcessLogger';
 import * as ErrorStackParser from 'error-stack-parser';
 import { StackFrame } from 'error-stack-parser';
 import * as extsprintf from 'extsprintf';
 import { ClassUtil } from '../ClassUtil';
-import { NullLogger } from '../Logger/NullLogger';
-import { PrefixDecoratorLogger } from '../Logger/PrefixDecoratorLogger';
+import { LoggerInterface } from 'triviality-logger/LoggerInterface';
+import { ProcessLogger } from 'triviality-logger/ProcessLogger';
+import { NullLogger } from 'triviality-logger/NullLogger';
+import { PrefixLogger } from 'triviality-logger/PrefixLogger';
 
 export interface TestTask {
   callback: () => Promise<any>;
@@ -702,7 +702,7 @@ export class EventSourcingTestBench {
   public getLogger(indent: number = 0): LoggerInterface {
     const totalIndent = this.indent + indent;
     if (totalIndent !== 0) {
-      return PrefixDecoratorLogger.with(this.logger,  extsprintf.sprintf(`%${totalIndent * 3}s`, ''));
+      return PrefixLogger.with(this.logger,  extsprintf.sprintf(`%${totalIndent * 3}s`, ''));
     }
     return this.logger;
   }
