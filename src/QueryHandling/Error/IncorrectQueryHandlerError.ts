@@ -13,4 +13,9 @@ export class IncorrectQueryHandlerError extends Error {
     return new this(`Missing a Query handler on ${QueryHandlerName}. Don't forget @HandleQuery annotation`);
   }
 
+  public static missingQuery(queryHandler: QueryHandler, functionName: string) {
+    const QueryHandlerName = ClassUtil.nameOffInstance(queryHandler);
+    return new this(`Missing a Query in @HandleQuery(<here>) arguments ${QueryHandlerName}.${functionName}`);
+  }
+
 }

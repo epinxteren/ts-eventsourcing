@@ -19,7 +19,7 @@ export function getHandleQueryMetadata(target: QueryHandler): QueryHandlerMetada
   return metadata;
 }
 
-export function HandleQuery(target: any, key: string): void {
+function HandleQueryByParameterTypes(target: any, key: string): void {
   const types = Reflect.getMetadata('design:paramtypes', target, key);
   const constructor = target.constructor as QueryHandlerConstructor;
   let handlers = Metadata.getMetadata(QUERY_HANDLERS, constructor);
@@ -35,4 +35,27 @@ export function HandleQuery(target: any, key: string): void {
   });
 
   Metadata.defineMetadata(QUERY_HANDLERS, handlers, constructor);
+}
+
+export function HandleQuery(target: any, functionName: string): void;
+export function HandleQuery(...queries: QueryConstructor[]): (target: any, functionName: string) => void;
+export function HandleQuery(...args: any[]): ((target: any, functionName: string) => void) | void {
+  if (args.length === 0 || typeof args[0] === 'function') {
+    return (target: any, functionName: string) => {
+      const constructor = target.constructor as QueryHandlerConstructor;
+      if (args.length === 0) {
+        throw IncorrectQueryHandlerError.missingQuery(constructor, functionName);
+      }
+      let handlers = Metadata.getMetadata(QUERY_HANDLERS, constructor);
+      handlers = handlers ? handlers : [];
+      for (const Query of args) {
+        handlers.push({
+          functionName,
+          Query,
+        });
+      }
+      Metadata.defineMetadata(QUERY_HANDLERS, handlers, constructor);
+    };
+  }
+  return HandleQueryByParameterTypes(args[0], args[1]);
 }

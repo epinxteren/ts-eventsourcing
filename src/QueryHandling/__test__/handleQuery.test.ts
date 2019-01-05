@@ -83,3 +83,60 @@ it('Should have an handle function', () => {
     getHandleQueryMetadata(new TestQueryHandler());
   }).toThrow(IncorrectQueryHandlerError);
 });
+
+it('Can register multiple Query handler by arguments', () => {
+  class TestQuery1 implements Query {
+
+  }
+
+  class TestQuery2 implements Query {
+
+  }
+
+  class TestQueryHandler implements QueryHandler {
+
+    @HandleQuery(TestQuery1, TestQuery2)
+    public handle(_Query: TestQuery1 | TestQuery2): void {
+      // noop
+    }
+
+    @HandleQuery(TestQuery1, TestQuery2)
+    public handleExtra(_Query: TestQuery1 | TestQuery2): void {
+      // noop
+    }
+  }
+
+  const queryHandler = new TestQueryHandler();
+  const metadata = getHandleQueryMetadata(queryHandler);
+
+  expect(metadata).toEqual([
+    {
+      functionName: 'handle',
+      Query: TestQuery1,
+    }, {
+      functionName: 'handle',
+      Query: TestQuery2,
+    },
+    {
+      functionName: 'handleExtra',
+      Query: TestQuery1,
+    }, {
+      functionName: 'handleExtra',
+      Query: TestQuery2,
+    },
+  ]);
+});
+
+it('Should pass Query to handler by arguments', () => {
+  expect(() => {
+    class TestQueryHandler implements QueryHandler {
+
+      @HandleQuery()
+      public handle(): void {
+        // noop
+      }
+    }
+    const handler = new TestQueryHandler();
+    handler.handle();
+  }).toThrow(IncorrectQueryHandlerError);
+});
